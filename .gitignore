@@ -3,4 +3,4 @@ src/instance/*
 test_config.sh
 src/inventoryapp/cardinventory.db
 *.pyc
-
+/.vagrant/*
