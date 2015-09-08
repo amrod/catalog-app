@@ -1,0 +1,41 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="{{url_for('index')}}">Card Inventory</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        {% if current_user.is_authenticated() %}
+        <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link">{{current_user.name}}</a></p>
+        {% else %}
+        <p class="navbar-text navbar-right"><a href="{{ url_for('gconnect') }}">Sign in with Google</a></p>
+        {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class = 'flash'>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+
+<div class="row text-center">
+    {% if mask is defined %}
+        <h1>{{ mask.name }}</h1>
+    {% endif %}
+</div>

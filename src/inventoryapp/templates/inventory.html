@@ -1,0 +1,41 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row text-center">
+    <div class="col-md-12 padding-top">
+        <a href="{{ url_for('new_mask') }}" class="btn btn-default" id="new_mask">
+            <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>New Mask
+        </a>
+        <a href="{{ url_for('empty_trash') }}" class="btn btn-default" id="empty_trash">
+            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Empty Trash
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6  col-md-offset-3">
+        <div class="panel panel-default">
+            <!-- Default panel contents -->
+            <div class="panel-heading">Current Masks</div>
+
+            <!-- Table -->
+            <table class="table">
+                <tr class="table-header">
+                    <th>Mask</th>
+                    <th>Quantity</th>
+                    <th>Actions</th>
+                </tr>
+                {% for m in masks %}
+                <tr>
+                    <td><a href="{{url_for('mask_detail', mask_id=m.id)}}"> {{m.name}} </a></td>
+                    <td> {{m.quantity}} </td>
+                    <td>
+                        <a class="btn btn-default" href="{{url_for('add_cards', mask_id=m.id)}}">Add </a>
+                        <a class="btn btn-default" href="{{url_for('transfer_cards', mask_id=m.id)}}">Transfer </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
