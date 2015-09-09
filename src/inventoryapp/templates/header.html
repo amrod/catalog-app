@@ -13,8 +13,8 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        {% if current_user.is_authenticated() %}
-        <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link">{{current_user.name}}</a></p>
+        {% if current_user.is_authenticated %}
+        <p class="navbar-text navbar-right">Signed in as {{current_user.name}} <a href="{{ url_for('logout') }}" class="navbar-link">Logout</a></p>
         {% else %}
         <p class="navbar-text navbar-right"><a href="{{ url_for('login') }}">Sign in with Google</a></p>
         {% endif %}
@@ -23,7 +23,18 @@
 </nav>
 
 <div class = 'flash'>
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(category_filter=["message"]) %}
+      {% if messages %}
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+<div class = 'error-flash'>
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
       {% if messages %}
         <ul>
         {% for message in messages %}

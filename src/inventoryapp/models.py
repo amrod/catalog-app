@@ -1,26 +1,33 @@
-from inventoryapp import app
-from flask.ext.login import UserMixin, LoginManager
+from inventoryapp import lm
+from flask.ext.login import UserMixin
 
-from . import db
+from . import db, app
 
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    social_id = db.Column(db.String(64), nullable=False, unique=True)
-    name = db.Column(db.String(64), nullable=False)
-    email = db.Column(db.String(64), nullable=True)
-    picture = db.Column(db.String(250))
+    name = db.Column(db.String(250), nullable=False)
+    email = db.Column(db.String(250), nullable=True)
+    picture_url = db.Column(db.String(2083))
+    authenticated = db.Column(db.Boolean, default=False)
+
     cards = db.relationship('Mask', backref='user', lazy='dynamic')
 
-    def __init__(self, name, email):
+    def __init__(self, name, email, picture_url=None):
         self.name = name
         self.email = email
+        self.picture_url = picture_url
+
+    @property
+    def is_authenticated(self):
+        """Return True if the user is authenticated."""
+        return self.authenticated
+
 
 class Mask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     form_factor = db.Column(db.String(32), nullable=False)
-    # cards = db.relationship('UserCard', backref='mask', lazy='dynamic')
     quantity = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     cards = db.relationship('Transaction', backref='mask', lazy='dynamic')
@@ -40,12 +47,52 @@ class Transaction(db.Model):
     mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), primary_key=True)
 
 
-# Initialize Flask-Login extension
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-@login_manager.user_loader
-def load_user(id):
+@lm.user_loader
+def load_user_from_id(id):
     return User.query.get(int(id))
+
+def get_user(email):
+    try:
+        user = db.session.query(User).filter_by(email=email).one()
+        return user
+    except Exception as err:
+        app.logger.error(err)
+        return None
+
+def create_user(session):
+    try:
+        user = User(name=session.get('name'),
+                    email=session.get('email'),
+                    picture_url=session.get('picture'))
+
+        db.session.add(user)
+        db.session.commit()
+        return user
+    except Exception as err:
+        app.logger.error(err)
+        return None
+
+def load_user(session):
+    user = get_user(session.get('email'))
+
+    if not user:
+        user = create_user(session)
+
+    if not user:
+        return user
+
+    updated = False
+    if user.name != session.get('name'):
+        user.name = session.get('name')
+        updated = True
+
+    if user.picture_url != session.get('picture'):
+        user.picture_url = session.get('picture')
+        updated = True
+
+    if updated:
+        db.session.commit()
+
+    return user
 
 
