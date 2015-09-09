@@ -174,9 +174,9 @@ def mask_detail(mask_id):
            {'id': 3, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 50, 'date': '2015/1/5', 'user': 'Boris S.'},
            {'id': 4, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 10, 'date': '2015/1/2', 'user': 'Amaury Rodriguez'},
            {'id': 5, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 80, 'date': '2015/3/1', 'user': 'Amaury Rodriguez'},]
+    
 
     return render_template('mask_detail.html', mask=mask, transactions=txs)
-
 
 @app.route('/mask/new', methods=["GET", "POST"])
 @login_required
