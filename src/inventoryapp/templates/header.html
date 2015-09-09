@@ -13,10 +13,10 @@
 
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-        {% if current_user.is_authenticated %}
-        <p class="navbar-text navbar-right">Signed in as {{current_user.name}} <a href="{{ url_for('logout') }}" class="navbar-link">Logout</a></p>
+        {% if current_user.is_authenticated() %}
+        <p class="navbar-text navbar-right" ><span class="user-name">Signed in as {{current_user.name}}</span> (<strong><a href="{{ url_for('logout') }}" class="navbar-link">Logout</a></strong>)</p>
         {% else %}
-        <p class="navbar-text navbar-right"><a href="{{ url_for('login') }}">Sign in with Google</a></p>
+        <p class="navbar-text navbar-right"><a class="navbar-link" href="{{ url_for('login') }}">Sign in with Google</a></p>
         {% endif %}
     </div>
   </div>

@@ -9,7 +9,6 @@ class User(UserMixin, db.Model):
     name = db.Column(db.String(250), nullable=False)
     email = db.Column(db.String(250), nullable=True)
     picture_url = db.Column(db.String(2083))
-    authenticated = db.Column(db.Boolean, default=False)
 
     cards = db.relationship('Mask', backref='user', lazy='dynamic')
 
@@ -18,24 +17,21 @@ class User(UserMixin, db.Model):
         self.email = email
         self.picture_url = picture_url
 
-    @property
-    def is_authenticated(self):
-        """Return True if the user is authenticated."""
-        return self.authenticated
-
 
 class Mask(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     form_factor = db.Column(db.String(32), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     cards = db.relationship('Transaction', backref='mask', lazy='dynamic')
 
-    def __init__(self, name, form_factor, quantity):
+    def __init__(self, name, form_factor, quantity, user_id):
         self.name = name
         self.form_factor = form_factor
         self.quantity = quantity
+        self.user_id = user_id
 
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -44,6 +40,7 @@ class Transaction(db.Model):
     destination = db.Column(db.String(64), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
+
     mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), primary_key=True)
 
 

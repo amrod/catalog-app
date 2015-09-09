@@ -6,6 +6,6 @@ if __name__ == '__main__':
 
     db = inventoryapp.db
     db.create_all()
-    trash = User('trash', '0', 't@t')
+    trash = User( name='trash', picture_url='', email='t@t')
     db.session.add(trash)
     db.session.commit()

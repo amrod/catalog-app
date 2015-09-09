@@ -1,19 +1,18 @@
 from inventoryapp import app
 from inventoryapp import db
+from inventoryapp import lm
 
 from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
 from forms import NewMaskForm, EditMaskForm, AddCardsForm, TransferCardsForm, EmptyTrashForm
 from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 
-# from models import User, Mask
 import models
 
 from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
 import json
 import requests
-
 
 class M:
     pass
@@ -26,6 +25,8 @@ GOOGLE_USER_INFO = 'https://www.googleapis.com/oauth2/v1/userinfo'
 GOOGLE_REVOKE = 'https://accounts.google.com/o/oauth2/revoke'
 GOOGLE_CLIENT_ID = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_id']
 GOOGLE_CLIENT_SECRET = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_secret']
+
+lm.login_view = 'index'
 
 ginfo = requests.get(GOOGLE_WELL_KNOWN).json()
 
@@ -72,35 +73,7 @@ def oauth_authorized(resp):
         flash(u'Invalid token.', 'error')
         return redirect(next_url)
 
-    # print jwt
-
-    # r = requests.get(GOOGLE_TOKEN_INFO, params={'access_token': resp['access_token']}).json()
-
-    # {u'picture': u'https://...photo.jpg',
-    # u'aud': u'...',
-    # u'family_name': u'Rodriguez',
-    # u'iss': u'https://accounts.google.com',
-    # u'email_verified': True,
-    # u'name': u'Amaury Rodriguez',
-    # u'at_hash': u'...',
-    # u'given_name': u'Amaury',
-    # u'exp': 1441816107,
-    # u'azp': u'...',
-    # u'iat': 1441812507,
-    # u'locale': u'en',
-    # u'email': u'...',
-    # u'sub': u'...'}
-
     fmsg = None
-    # This is not a valid token.
-    # if r.get('error') is not None:
-    #     fmsg = u'Error authenticating user.'
-
-    # Verify that the access token is used for the intended user.
-    # if r['user_id'] != jwt.get('sub'):
-    #     fmsg = u"Error: Token's user ID doesn't match given user ID."
-    #     response = make_response(json.dumps(s), 401, JSON_CT)
-    #     return response
 
     # Verify that the access token is valid for this app.
     if jwt.get('aud') != GOOGLE_CLIENT_ID:
@@ -128,7 +101,7 @@ def oauth_authorized(resp):
 
         if user:
             login_user(user, remember=True)  # To manage logged in users with Flask-Login
-            fmsg = make_flash_params(u'You were signed in.')
+            fmsg = make_flash_params(u'You were signed in as %s.' % jwt.get('name'))
         else:
             reset_user_session_vars(session)
             fmsg = make_flash_params(u'Error registering user %s in the database.' % jwt.get('name'), 'error')
@@ -170,13 +143,6 @@ def logout():
 
     return redirect(url_for('index'))
 
-
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if current_user is not None and current_user.is_authenticated():
-#         return redirect(url_for('index'))
-#     return render_template('login.html')
-
 def reset_user_session_vars(session):
     # Reset the user's session variables
     session.pop('name', None)
@@ -187,11 +153,6 @@ def reset_user_session_vars(session):
 
 def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}
-
-def get_google_user_info(access_token):
-    params = {'access_token': access_token, 'alt': 'json'}
-    r = requests.get(GOOGLE_USER_INFO, params=params)
-    return r.json()
 
 @app.route('/inventory')
 @app.route('/')
@@ -224,9 +185,10 @@ def new_mask():
 
     if form.validate_on_submit():
         print "Creating new mask"
-        new_mask = models.Mask(name=form.name.data,
+        new_mask = models.Mask(name=form.mask_name.data,
                                form_factor=form.form_factor.data,
-                               quantity=form.quantity.data)
+                               quantity=form.quantity.data,
+                               user_id=current_user.id)
         print "new mask created"
         db.session.add(new_mask)
         db.session.commit()
@@ -236,6 +198,7 @@ def new_mask():
     return render_template('new_mask.html', form=form)
 
 @app.route('/mask/<int:mask_id>/edit', methods=["GET", "POST"])
+@login_required
 def edit_mask(mask_id):
     form = EditMaskForm()
 
@@ -250,6 +213,7 @@ def edit_mask(mask_id):
     return render_template('edit_mask.html', form=form, mask=mask)
 
 @app.route('/mask/<int:mask_id>/add', methods=["GET", "POST"])
+@login_required
 def add_cards(mask_id):
     form = AddCardsForm()
 
@@ -264,6 +228,7 @@ def add_cards(mask_id):
     return render_template('add_cards.html', form=form, mask=mask)
 
 @app.route('/mask/<int:mask_id>/transfer', methods=["GET", "POST"])
+@login_required
 def transfer_cards(mask_id):
 
     users = [(1, 'Amaury Rodriguez'), (2, 'Arthur L.'), (3, 'Boris S.'), (4, 'Bill M.')]
@@ -281,6 +246,7 @@ def transfer_cards(mask_id):
     return render_template('transfer_cards.html', form=form, mask=mask)
 
 @app.route('/trash/empty', methods=["GET", "POST"])
+@login_required
 def empty_trash():
 
     form = EmptyTrashForm()
