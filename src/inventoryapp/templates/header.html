@@ -16,7 +16,7 @@
         {% if current_user.is_authenticated() %}
         <p class="navbar-text navbar-right">Signed in as <a href="#" class="navbar-link">{{current_user.name}}</a></p>
         {% else %}
-        <p class="navbar-text navbar-right"><a href="{{ url_for('gconnect') }}">Sign in with Google</a></p>
+        <p class="navbar-text navbar-right"><a href="{{ url_for('login') }}">Sign in with Google</a></p>
         {% endif %}
     </div>
   </div>

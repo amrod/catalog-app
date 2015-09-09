@@ -1,93 +1,118 @@
 from inventoryapp import app
 from inventoryapp import db
-from flask import Flask, render_template, redirect, url_for, request, jsonify, flash
+from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
 from forms import NewMaskForm, EditMaskForm, AddCardsForm, TransferCardsForm, EmptyTrashForm
 from models import User, Mask
-import json
-from rauth import OAuth2Service
 
+from oauth2client.client import verify_id_token
+import json
+import requests
+
+from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, login_required
 
 class M:
     pass
 
-GOOGLE_CLIENT_ID = json.loads(open('client_secrets.json', 'r').read())['web']['client_id']
-GOOGLE_CLIENT_SECRET = json.loads(open('client_secrets.json', 'r').read())['web']['client_secret']
+JSON_CT = {'Content-Type': 'application/json'}
+GOOGLE_WELL_KNOWN = 'https://accounts.google.com/.well-known/openid-configuration'
+GOOGLE_TOKEN_INFO ='https://www.googleapis.com/oauth2/v1/tokeninfo'
+GOOGLE_USER_INFO = 'https://www.googleapis.com/oauth2/v1/userinfo'
+GOOGLE_CLIENT_ID = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_id']
+GOOGLE_CLIENT_SECRET = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_secret']
+
+ginfo = requests.get(GOOGLE_WELL_KNOWN).json()
+
+oauth = OAuth()
+
+google = oauth.remote_app('google',
+    base_url='https://www.google.com/accounts/',
+    request_token_url=None,
+    access_token_url=ginfo['token_endpoint'],
+    authorize_url=ginfo['authorization_endpoint'],
+    request_token_params={'scope': 'email',
+                          'response_type': 'code'},
+    access_token_method='POST',
+    access_token_params={'grant_type': 'authorization_code'},
+    consumer_key=GOOGLE_CLIENT_ID,
+    consumer_secret=GOOGLE_CLIENT_SECRET)
 
 
-
-
-service = OAuth2Service(name='google',
-                        client_id=GOOGLE_CLIENT_ID,
-                        client_secret=GOOGLE_CLIENT_SECRET,
-                        authorize_url='https://accounts.google.com/o/oauth2/auth',
-                        access_token_url='https://accounts.google.com/o/oauth2/token',
-                        base_url='https://www.google.com/accounts/')
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login():
-    if current_user is not None and current_user.is_authenticated():
-        return redirect(url_for('index'))
-    return render_template('login.html')
+    res =  google.authorize(callback=url_for('oauth_authorized', _external=True))
+    return res
+
+@google.tokengetter
+def get_google_token(token=None):
+    return session.get('access_token')
+
+@app.route('/authorized')
+@google.authorized_handler
+def oauth_authorized(resp):
+
+    next_url = request.args.get('next') or url_for('index')
+
+    if resp is None:
+
+        flash(u'Request to sign in was denied by the user.')
+        return redirect(next_url)
 
 
-@app.route('/gconnect')
-def gconnect():
-    if not current_user.is_anonymous():
-        return redirect(url_for('index'))
+    jwt = verify_id_token(resp['id_token'], GOOGLE_CLIENT_ID)
 
-    # _external=True to generate an absolute URL (to be called by provider
-    redir_url = url_for('oauth_redirect', _external=True)
-    print redir_url
+    r = requests.get(GOOGLE_TOKEN_INFO, params={'access_token': resp['access_token']}).json()
 
-    auth_url = service.get_authorize_url(scope='email',
-                                         response_type='code',
-                                         redirect_uri=redir_url)
-    print auth_url
-    return redirect(auth_url)
+    fmsg = None
+    # This is not a valid token.
+    if r.get('error') is not None:
+        fmsg = u'Error authenticating user.'
 
-@app.route('/oauth_redirect')
-def oauth_redirect():
-    if not current_user.is_anonymous():
-        return redirect(url_for('index'))
+    # Verify that the access token is used for the intended user.
+    if r['user_id'] != jwt.get('sub'):
+        fmsg = u"Error: Token's user ID doesn't match given user ID."
+        # response = make_response(json.dumps(s), 401, JSON_CT)
+        # return response
 
-    if 'code' not in request.args:
-        return None, None, None
+    # Verify that the access token is valid for this app.
+    if r.get('issued_to') != GOOGLE_CLIENT_ID:
+        fmsg = u"Error: Token's client ID does not match app's."
+        # response = make_response(json.dumps(s), 401, JSON_CT)
+        # return response
 
-    oauth_session = service.get_auth_session(
-            data={'code': request.args['code'],
-                  'grant_type': 'authorization_code',
-                  'redirect_uri': url_for('oauth_redirect', _external=True)},
-            decoder = json.loads)
+    # Check is user is already signed in.
+    stored_token = session.get('access_token')
+    stored_gplus_id = session.get('gplus_id')
+    if stored_token is not None and jwt.get('sub') == stored_gplus_id:
+        fmsg = u'Current user is already connected.'
+        # response = make_response(json.dumps(s), 200, JSON_CT)
+        # return response
 
-    print oauth_session
-    print dir(oauth_session)
+    if fmsg is not None:
+        data = get_google_user_info(resp['access_token'])
+        session['username'] = data['name']
+        session['picture'] = data['picture']
+        session['email'] = data['email']
 
-    #answer = oauth_session.get('https://www.googleapis.com/oauth2/v3/token')
-    #answer = oauth_session.get('')
+        session['access_token'] = resp['access_token']
+        session['access_token'] = resp['expires_in']
+        fmsg = u'You were signed in.'
 
-    print "****JSON response:%s" % dir(service)
-    print service.access_token_response
+    flash(fmsg)
+    return redirect(next_url)
 
-    name = answer['name']
-    email  = answer['email']
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if current_user is not None and current_user.is_authenticated():
+#         return redirect(url_for('index'))
+#     return render_template('login.html')
 
-    if email is None:
-        flash('Authentication failed.')
-        return redirect(url_for('index'))
 
-    user = User.query.filter_by(email=email).first()
 
-    # If user does not exist, create it
-    if not user:
-        user = User(name=name , email=email)
-        db.session.add(user)
-        db.session.commit()
-
-    # Log in the user with Flask-Login and remember them for their next visit
-    login_user(user, remember=True)
-    return redirect(url_for('index'))
-
+def get_google_user_info(access_token):
+    params = {'access_token': access_token, 'alt': 'json'}
+    r = requests.get(GOOGLE_USER_INFO, params=params)
+    return r.json()
 
 @app.route('/inventory')
 @app.route('/')
