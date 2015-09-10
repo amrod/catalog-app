@@ -242,14 +242,35 @@ def add_cards(mask_id):
 @app.route('/mask/<int:mask_id>/transfer', methods=["GET", "POST"])
 @login_required
 def transfer_cards(mask_id):
-
-    users = [(1, 'Amaury Rodriguez'), (2, 'Arthur L.'), (3, 'Boris S.'), (4, 'Bill M.')]
-    mask = M()
-    mask.id = 1
-    mask.name = 'G242'
-
     form = TransferCardsForm()
-    form.destination.choices = users
+
+    trash = User.query.filter_by(name='trash').first()
+    if not trash:
+        msg = 'No trash bin has defined. Please contact you system administrator.'
+        app.logger.error(msg)
+        flash(msg, 'error')
+        return redirect(url_for('mask_detail', mask_id=mask_id))
+
+    form.destination.choices = [(trash.id, trash.name)]
+    mask = Mask.query.get_or_404(mask_id)
+
+    if mask.user_id != current_user.id:
+        flash('You do not have permission to transfer cards from this mask.', 'error')
+        return redirect(url_for('mask_detail', mask_id=mask_id))
+
+    if form.validate_on_submit():
+        mask.quantity += form.quantity.data
+        dt = datetime.now().replace(microsecond=0)
+        trans = Transaction(desc=form.reason.data,
+                            src=mask.user.name,
+                            dest=trash.name,
+                            qty=form.quantity.data,
+                            date=dt,
+                            mask_id=mask_id,
+                            user_id=mask.user_id)
+
+        db.session.add(trans)
+        db.session.commit()
 
     if form.validate_on_submit():
         print "Cards Transferred"

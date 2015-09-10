@@ -18,7 +18,7 @@ class AddCardsForm(Form):
 class TransferCardsForm(Form):
     quantity = IntegerField('Quantity', validators=[validators.NumberRange(min=1)])
     destination = SelectField('Destination', coerce=int)
-    reason = StringField('Form Factor', validators=[validators.Length(min=1, max=250)])
+    reason = StringField('Reason', validators=[validators.Length(min=1, max=250)])
 
 class EmptyTrashForm(Form):
     label = 'I confirm all cards in the Trash Bin have been properly destroyed. The count will be set to zero.'
