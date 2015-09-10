@@ -14,6 +14,7 @@ from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
 import json
 import requests
+from datetime import datetime
 
 class M:
     pass
@@ -213,12 +214,27 @@ def edit_mask(mask_id):
 def add_cards(mask_id):
     form = AddCardsForm()
 
-    mask = M()
-    mask.id = 1
-    mask.name = 'G242'
+    mask = Mask.query.get_or_404(mask_id)
+
+    if mask.user_id != current_user.id:
+        flash('You do not have permission to add cards for this mask.', 'error')
+        return redirect(url_for('mask_detail', mask_id=mask_id))
 
     if form.validate_on_submit():
-        print "Cards Added"
+        mask.quantity += form.quantity.data
+        dt = datetime.now().replace(microsecond=0)
+        trans = Transaction(desc='New cards',
+                            src=mask.user.name,
+                            dest=mask.name,
+                            qty=form.quantity.data,
+                            date=dt,
+                            mask_id=mask_id,
+                            user_id=mask.user_id)
+
+        db.session.add(trans)
+        db.session.commit()
+
+        flash('%s cards added to %s successfully!' % (form.quantity.data, mask.name))
         return redirect(url_for('mask_detail', mask_id=mask_id))
 
     return render_template('add_cards.html', form=form, mask=mask)

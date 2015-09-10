@@ -45,6 +45,15 @@ class Transaction(db.Model):
     mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+    def __init__(self, desc, src, dest, qty, date, mask_id, user_id):
+        self.description = desc
+        self.source = src
+        self.destination = dest
+        self.quantity = qty
+        self.date = date
+        self.mask_id = mask_id
+        self.user_id = user_id
+
 
 @lm.user_loader
 def load_user_from_id(id):
