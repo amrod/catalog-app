@@ -183,7 +183,7 @@ def new_mask():
         print "new mask created"
         db.session.add(new_mask)
         db.session.commit()
-        flash("New mask successfully created")
+        flash("New mask created successfully!")
         return redirect(url_for('index'))
 
     return render_template('new_mask.html', form=form)
@@ -193,12 +193,17 @@ def new_mask():
 def edit_mask(mask_id):
     form = EditMaskForm()
 
-    mask = M()
-    mask.id = 1
-    mask.name = 'G242'
+    mask = Mask.query.get_or_404(mask_id)
+
+    if mask.user_id != current_user.id:
+        flash('You do not have permission to edit this mask.', 'error')
+        return redirect(url_for('mask_detail', mask_id=mask_id))
 
     if form.validate_on_submit():
-        print "Mask edited"
+        mask.form_factor = form.form_factor.data
+        mask.name = form.mask_name.data
+        db.session.commit()
+        flash('Record updated successfully!')
         return redirect(url_for('mask_detail', mask_id=mask_id))
 
     return render_template('edit_mask.html', form=form, mask=mask)
