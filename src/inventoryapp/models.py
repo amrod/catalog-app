@@ -11,6 +11,7 @@ class User(UserMixin, db.Model):
     picture_url = db.Column(db.String(2083))
 
     cards = db.relationship('Mask', backref='user', lazy='dynamic')
+    transactions = db.relationship('Transaction', backref='user', lazy='dynamic')
 
     def __init__(self, name, email, picture_url=None):
         self.name = name
@@ -41,7 +42,8 @@ class Transaction(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     date = db.Column(db.DateTime, nullable=False)
 
-    mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), primary_key=True)
+    mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 
 @lm.user_loader
