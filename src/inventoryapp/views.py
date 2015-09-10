@@ -8,6 +8,7 @@ from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 
 import models
+from models import User, Mask, Transaction
 
 from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
@@ -157,25 +158,15 @@ def make_flash_params(message, category='message'):
 @app.route('/inventory')
 @app.route('/')
 def index():
-    # masks = [{'id': 1, 'name': 'G242', 'quantity': 20},
-    #          {'id': 2, 'name': 'STM008', 'quantity': 50}]
-
-    masks = db.session.query(models.Mask).order_by(db.asc(models.Mask.name))
+    # masks = db.session.query(models.Mask).order_by(db.asc(models.Mask.name))
+    masks = Mask.query.order_by(Mask.name.asc()).all()
     return render_template('inventory.html', masks=masks)
 
 @app.route('/mask/<int:mask_id>')
 def mask_detail(mask_id):
 
-    mask = M()
-    mask.id = 1
-    mask.name = 'G242'
-    txs = [{'id': 1, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 20, 'date': '2015/1/6', 'user': 'Juan Perez'},
-           {'id': 2, 'description': 'Development', 'from': 'loc1', 'to': 'loc2', 'quantity': 30, 'date': '2015/9/1', 'user': 'Amaury Rodriguez'},
-           {'id': 3, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 50, 'date': '2015/1/5', 'user': 'Boris S.'},
-           {'id': 4, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 10, 'date': '2015/1/2', 'user': 'Amaury Rodriguez'},
-           {'id': 5, 'description': 'New cards', 'from': 'loc1', 'to': 'loc2', 'quantity': 80, 'date': '2015/3/1', 'user': 'Amaury Rodriguez'},]
-    
-
+    txs = Transaction.query.filter_by(mask_id=mask_id)
+    mask = Mask.query.get_or_404(mask_id)
     return render_template('mask_detail.html', mask=mask, transactions=txs)
 
 @app.route('/mask/new', methods=["GET", "POST"])
