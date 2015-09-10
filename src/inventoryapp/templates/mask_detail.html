@@ -37,12 +37,12 @@
                 </tr>
                 {% for t in transactions %}
                 <tr>
-                    <td> {{t.description}} </td>
-                    <td> {{t.from}} </td>
-                    <td> {{t.to}} </td>
+                    <td> {{t.description|truncate(25)}} </td>
+                    <td> {{t.source}} </td>
+                    <td> {{t.destination}} </td>
                     <td> {{t.quantity}} </td>
                     <td> {{t.date}} </td>
-                    <td> {{t.user}} </td>
+                    <td> {{t.user.name|truncate(25)}} </td>
                 </tr>
                 {% endfor %}
             </table>

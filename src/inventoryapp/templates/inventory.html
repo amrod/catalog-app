@@ -15,7 +15,7 @@
 </div>
 <br>
 <div class="row">
-    <div class="col-md-6  col-md-offset-3">
+    <div class="col-md-8  col-md-offset-2">
         <div class="panel panel-default">
             <!-- Default panel contents -->
             <div class="panel-heading">Current Masks</div>
@@ -24,13 +24,17 @@
             <table class="table">
                 <tr class="table-header">
                     <th>Mask</th>
+                    <th>Form Factor</th>
                     <th>Quantity</th>
+                    <th>Owner</th>
                     <th>Actions</th>
                 </tr>
                 {% for m in masks %}
                 <tr>
                     <td><a href="{{url_for('mask_detail', mask_id=m.id)}}"> {{m.name}} </a></td>
-                    <td> {{m.quantity}} </td>
+                    <td> {{m.form_factor}}</td>
+                    <td> {{m.quantity}}</td>
+                    <td>{{m.user.name|truncate(16)}}</td>
                     <td>
                         <a class="btn btn-default" href="{{url_for('add_cards', mask_id=m.id)}}">Add </a>
                         <a class="btn btn-default" href="{{url_for('transfer_cards', mask_id=m.id)}}">Transfer </a>
