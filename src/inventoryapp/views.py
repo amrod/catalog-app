@@ -175,13 +175,13 @@ def mask_detail(mask_id):
 def new_mask():
     form = NewMaskForm()
 
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
-        print "Creating new mask"
         new_mask = models.Mask(name=form.mask_name.data,
                                form_factor=form.form_factor.data,
                                quantity=form.quantity.data,
                                user_id=current_user.id)
-        print "new mask created"
+
         db.session.add(new_mask)
         db.session.commit()
         flash("New mask created successfully!")
@@ -259,6 +259,41 @@ def transfer_cards(mask_id):
         return redirect(url_for('mask_detail', mask_id=mask_id))
 
     if form.validate_on_submit():
+
+        if form.quantity.data > mask.quantity:
+            msg = 'Not enough cards left. You can transfer a maximum of %s' % mask.quantity
+            flash(msg, 'error')
+            return redirect(url_for('transfer_cards', mask_id=mask_id))
+
+        mask.quantity -= form.quantity.data
+
+        dt = datetime.now().replace(microsecond=0)
+        trans = Transaction(desc=form.reason.data,
+                            src=mask.user.name,
+                            dest=trash.name,
+                            qty=form.quantity.data,
+                            date=dt,
+                            mask_id=mask_id,
+                            user_id=mask.user_id)
+
+        db.session.add(trans)
+        db.session.commit()
+
+        flash('{qty} {name} cards transferred to {dest} successfully!'.format(qty=trans.quantity,
+                                                                              name=mask.user.name,
+                                                                              dest=trash.name))
+        return redirect(url_for('mask_detail', mask_id=mask_id))
+
+    return render_template('transfer_cards.html', form=form, mask=mask)
+
+@app.route('/trash/empty', methods=["GET", "POST"])
+@login_required
+def empty_trash():
+
+    form = EmptyTrashForm()
+
+
+    if form.validate_on_submit():
         mask.quantity += form.quantity.data
         dt = datetime.now().replace(microsecond=0)
         trans = Transaction(desc=form.reason.data,
@@ -273,23 +308,10 @@ def transfer_cards(mask_id):
         db.session.commit()
 
     if form.validate_on_submit():
-        print "Cards Transferred"
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    return render_template('transfer_cards.html', form=form, mask=mask)
-
-@app.route('/trash/empty', methods=["GET", "POST"])
-@login_required
-def empty_trash():
-
-    form = EmptyTrashForm()
-    if form.validate_on_submit():
         print "Trash emptied"
         return redirect(url_for('index'))
 
     return render_template('empty_trash.html', form=form)
-
-
 
 
 

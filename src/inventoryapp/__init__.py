@@ -8,8 +8,10 @@ from flask.ext.login import LoginManager
 lm = LoginManager()
 lm.init_app(app)
 
+from flask_wtf.csrf import CsrfProtect
 import inventoryapp.views
 from models import User
 
 app.config.from_object('config')
 app.config.from_pyfile('config.py')
+CsrfProtect(app)
