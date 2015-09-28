@@ -1,0 +1,26 @@
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Dish Name</th>
+            <th>Category</th>
+            <th>Author</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for r in recipes %}
+        <tr>
+            <td>#</td>
+            <td><a href="{{url_for('recipe_detail', recipe_id=r.id)}}"> {{r.name}} </a></td>
+            <td> {{r.category.name}}</td>
+            <td>{{r.user.name|truncate(16)}}</td>
+            <td>
+                <a class="btn btn-default" href="{{url_for('edit_recipe', recipe_id=r.id)}}">Edit </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>

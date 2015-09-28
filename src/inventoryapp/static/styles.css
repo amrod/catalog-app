@@ -3,6 +3,11 @@
 
 }
 
+/* Move down content because we have a fixed navbar that is 50px tall */
+body {
+  padding-top: 50px;
+}
+
 .errors {
     color: red;
 }
@@ -37,3 +42,11 @@
     font-style: italic;
 }
 
+
+.navbar-link#right {
+    padding: 15px 15px;
+}
+
+.navbar-right#right {
+    padding: 15px 15px;
+}

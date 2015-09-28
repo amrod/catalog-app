@@ -3,21 +3,17 @@ from inventoryapp import db
 from inventoryapp import lm
 
 from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
-from forms import NewMaskForm, EditMaskForm, AddCardsForm, TransferCardsForm, EmptyTrashForm
+from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm
 from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 
 import models
-from models import User, Mask, Transaction
+from models import User, Category, Item
 
 from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
 import json
 import requests
-from datetime import datetime
-
-class M:
-    pass
 
 JSON_CT = {'Content-Type': 'application/json'}
 GOOGLE_ISS = ('accounts.google.com', 'https://accounts.google.com')
@@ -145,6 +141,121 @@ def logout():
 
     return redirect(url_for('index'))
 
+
+@app.route('/index')
+@app.route('/')
+def index():
+    recipes = Item.query.all() #order_by(Category.name.asc()).
+    subtitle='All Recipes'
+    return render_template('index.html', recipes=recipes, subtitle=subtitle)
+
+@app.route('/category/<category_id>')
+def category(category_id):
+    recipes = Item.query.filter_by(category_id=category_id).all()
+    category = Category.query.get(category_id)
+    return render_template('index.html', recipes=recipes, subtitle=category.name)
+
+
+@app.route('/recipe/<recipe_id>')
+def recipe_detail(recipe_id):
+
+    item = Item.query.get_or_404(recipe_id)
+    print item
+    return render_template('recipe_detail.html', recipe=item)
+
+@app.route('/recipe/new', methods=["GET", "POST"])
+@login_required
+def new_recipe():
+    form = NewRecipeForm()
+
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
+    if form.validate_on_submit():
+        new_recipe = models.Item(name=form.item_name.data, user_id=current_user.id)
+
+        db.session.add(new_recipe)
+        db.session.commit()
+        flash("New recipe created successfully!")
+        return redirect(url_for('index'))
+
+    return render_template('new_recipe.html', form=form)
+
+@app.route('/recipe/new', methods=["GET", "POST"])
+@login_required
+def new_category():
+    form = NewCategoryForm()
+
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
+    if form.validate_on_submit():
+        new_category = models.Category(name=form.category_name.data)
+
+        db.session.add(new_category)
+        db.session.commit()
+        flash("New category created successfully!")
+        return redirect(url_for('index'))
+
+    return render_template('new_category.html', form=form)
+
+@app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
+@login_required
+def edit_recipe(recipe_id):
+    form = EditRecipeForm()
+
+    recipe = Item.query.get_or_404(recipe_id)
+
+    if recipe.user_id != current_user.id:
+        flash('You do not have permission to edit this recipe.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    if form.validate_on_submit():
+        recipe.name = form.recipe_name
+        recipe.description = form.description
+        recipe.category_id  = form.category
+        db.session.commit()
+
+        flash('Record updated successfully!')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    return render_template('edit_recipe.html', form=form, recipe=recipe)
+
+@app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])
+@login_required
+def delete_recipe(recipe_id):
+    return index()
+
+
+
+# @app.route('/recipe/<recipe_id>/add', methods=["GET", "POST"])
+# @login_required
+# def add_item(recipe_id):
+#     form = AddCardsForm()
+#
+#     mask = Category.query.get_or_404(recipe_id)
+#
+#     if mask.user_id != current_user.id:
+#         flash('You do not have permission to add cards for this mask.', 'error')
+#         return redirect(url_for('item_detail', mask_id=recipe_id))
+#
+#     if form.validate_on_submit():
+#         mask.quantity += form.quantity.data
+#         dt = datetime.now().replace(microsecond=0)
+#         trans = Transaction(desc='New cards',
+#                             src=mask.user.name,
+#                             dest=mask.name,
+#                             qty=form.quantity.data,
+#                             date=dt,
+#                             mask_id=recipe_id,
+#                             user_id=mask.user_id)
+#
+#         db.session.add(trans)
+#         db.session.commit()
+#
+#         flash('%s cards added to %s successfully!' % (form.quantity.data, mask.name))
+#         return redirect(url_for('item_detail', mask_id=recipe_id))
+#
+#     return render_template('add_cards.html', form=form, mask=mask)
+
+# Helper functions
+
 def reset_user_session_vars(session):
     # Reset the user's session variables
     session.pop('name', None)
@@ -155,163 +266,3 @@ def reset_user_session_vars(session):
 
 def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}
-
-@app.route('/inventory')
-@app.route('/')
-def index():
-    # masks = db.session.query(models.Mask).order_by(db.asc(models.Mask.name))
-    masks = Mask.query.order_by(Mask.name.asc()).all()
-    return render_template('inventory.html', masks=masks)
-
-@app.route('/mask/<int:mask_id>')
-def mask_detail(mask_id):
-
-    txs = Transaction.query.filter_by(mask_id=mask_id)
-    mask = Mask.query.get_or_404(mask_id)
-    return render_template('mask_detail.html', mask=mask, transactions=txs)
-
-@app.route('/mask/new', methods=["GET", "POST"])
-@login_required
-def new_mask():
-    form = NewMaskForm()
-
-    # Form-WTF implements CSRF using the Flask SECRET_KEY
-    if form.validate_on_submit():
-        new_mask = models.Mask(name=form.mask_name.data,
-                               form_factor=form.form_factor.data,
-                               quantity=form.quantity.data,
-                               user_id=current_user.id)
-
-        db.session.add(new_mask)
-        db.session.commit()
-        flash("New mask created successfully!")
-        return redirect(url_for('index'))
-
-    return render_template('new_mask.html', form=form)
-
-@app.route('/mask/<int:mask_id>/edit', methods=["GET", "POST"])
-@login_required
-def edit_mask(mask_id):
-    form = EditMaskForm()
-
-    mask = Mask.query.get_or_404(mask_id)
-
-    if mask.user_id != current_user.id:
-        flash('You do not have permission to edit this mask.', 'error')
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    if form.validate_on_submit():
-        mask.form_factor = form.form_factor.data
-        mask.name = form.mask_name.data
-        db.session.commit()
-        flash('Record updated successfully!')
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    return render_template('edit_mask.html', form=form, mask=mask)
-
-@app.route('/mask/<int:mask_id>/add', methods=["GET", "POST"])
-@login_required
-def add_cards(mask_id):
-    form = AddCardsForm()
-
-    mask = Mask.query.get_or_404(mask_id)
-
-    if mask.user_id != current_user.id:
-        flash('You do not have permission to add cards for this mask.', 'error')
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    if form.validate_on_submit():
-        mask.quantity += form.quantity.data
-        dt = datetime.now().replace(microsecond=0)
-        trans = Transaction(desc='New cards',
-                            src=mask.user.name,
-                            dest=mask.name,
-                            qty=form.quantity.data,
-                            date=dt,
-                            mask_id=mask_id,
-                            user_id=mask.user_id)
-
-        db.session.add(trans)
-        db.session.commit()
-
-        flash('%s cards added to %s successfully!' % (form.quantity.data, mask.name))
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    return render_template('add_cards.html', form=form, mask=mask)
-
-@app.route('/mask/<int:mask_id>/transfer', methods=["GET", "POST"])
-@login_required
-def transfer_cards(mask_id):
-    form = TransferCardsForm()
-
-    trash = User.query.filter_by(name='trash').first()
-    if not trash:
-        msg = 'No trash bin has defined. Please contact you system administrator.'
-        app.logger.error(msg)
-        flash(msg, 'error')
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    form.destination.choices = [(trash.id, trash.name)]
-    mask = Mask.query.get_or_404(mask_id)
-
-    if mask.user_id != current_user.id:
-        flash('You do not have permission to transfer cards from this mask.', 'error')
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    if form.validate_on_submit():
-
-        if form.quantity.data > mask.quantity:
-            msg = 'Not enough cards left. You can transfer a maximum of %s' % mask.quantity
-            flash(msg, 'error')
-            return redirect(url_for('transfer_cards', mask_id=mask_id))
-
-        mask.quantity -= form.quantity.data
-
-        dt = datetime.now().replace(microsecond=0)
-        trans = Transaction(desc=form.reason.data,
-                            src=mask.user.name,
-                            dest=trash.name,
-                            qty=form.quantity.data,
-                            date=dt,
-                            mask_id=mask_id,
-                            user_id=mask.user_id)
-
-        db.session.add(trans)
-        db.session.commit()
-
-        flash('{qty} {name} cards transferred to {dest} successfully!'.format(qty=trans.quantity,
-                                                                              name=mask.user.name,
-                                                                              dest=trash.name))
-        return redirect(url_for('mask_detail', mask_id=mask_id))
-
-    return render_template('transfer_cards.html', form=form, mask=mask)
-
-@app.route('/trash/empty', methods=["GET", "POST"])
-@login_required
-def empty_trash():
-
-    form = EmptyTrashForm()
-
-
-    if form.validate_on_submit():
-        mask.quantity += form.quantity.data
-        dt = datetime.now().replace(microsecond=0)
-        trans = Transaction(desc=form.reason.data,
-                            src=mask.user.name,
-                            dest=trash.name,
-                            qty=form.quantity.data,
-                            date=dt,
-                            mask_id=mask_id,
-                            user_id=mask.user_id)
-
-        db.session.add(trans)
-        db.session.commit()
-
-    if form.validate_on_submit():
-        print "Trash emptied"
-        return redirect(url_for('index'))
-
-    return render_template('empty_trash.html', form=form)
-
-
-

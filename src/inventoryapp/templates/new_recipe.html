@@ -5,15 +5,15 @@
 
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
-    <form action="{{ url_for('new_mask')}}" method=post>
+    <form action="{{ url_for('new_recipe')}}" method=post>
     {{ form.hidden_tag() }}
         <div class="row">
-            <div class="subtitle"><h3>Add Mask</h3></div>
+            <div class="subtitle"><h3>Add Recipe</h3></div>
             <div class="col-md-6 padding-top">
                 <dl>
-                    {{ render_field(form.mask_name) }}
-                    {{ render_field(form.form_factor) }}
-                    {{ render_field(form.quantity) }}
+                    {{ render_field(form.item_name) }}
+                    {{ render_field(form.desc) }}
+                    {{ render_field(form.category) }}
                 </dl>
             </div>
         </div>

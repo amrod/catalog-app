@@ -1,0 +1,48 @@
+{% extends "_main.html" %}
+{% block content %}
+{% include "_header.html" %}
+
+
+<div class="container-fluid">
+    <div class="row">
+
+        {% include "_sidemenu.html" %}
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">Dashboard</h1>
+
+            {% include "_featured.html" %}
+
+            <h2 class="sub-header">{{subtitle}}</h2>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Dish Name</th>
+                        <th>Category</th>
+                        <th>Author</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for r in recipes %}
+                    <tr>
+                        <td>#</td>
+                        <td><a href="{{url_for('recipe_detail', recipe_id=r.id)}}"> {{r.name}} </a></td>
+                        <td> {{r.category.name}}</td>
+                        <td>{{r.user.name|truncate(16)}}</td>
+                        <td>
+                            <a class="btn btn-default" href="{{url_for('edit_recipe', recipe_id=r.id)}}">Edit </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

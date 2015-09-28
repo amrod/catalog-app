@@ -1,0 +1,40 @@
+{% extends "_main.html" %}
+{% block content %}
+{% include "_header.html" %}
+
+
+<div class="container-fluid">
+
+    <div class="row text-center">
+        <div class="col-md-12 padding-top">
+            {% if current_user.is_authenticated() %}
+            <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}" class="btn btn-default" id="edit_item">
+                <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>Edit Mask
+            </a>
+            <a href="{{ url_for('delete_recipe', item_id=recipe.id) }}" class="btn btn-default" id="delete_item">
+                <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>Delete
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row">
+
+        {% include "_sidemenu.html" %}
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <h1 class="page-header">Recipe Detail</h1>
+
+            {% include "_featured.html" %}
+
+            <h2 class="sub-header">{{ recipe.name }}</h2>
+            <p class="sub-header">{{ recipe.description }}</p>
+            <p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
+            <p class="footnote">Date added: {{ recipe.date_added }}</p>
+
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,17 +1,17 @@
 from inventoryapp import lm
 from flask.ext.login import UserMixin
+from datetime import datetime
 
 from . import db, app
 
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), nullable=False)
+    name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(250), nullable=True)
     picture_url = db.Column(db.String(2083))
 
-    cards = db.relationship('Mask', backref='user', lazy='dynamic')
-    transactions = db.relationship('Transaction', backref='user', lazy='dynamic')
+    items = db.relationship('Item', backref='user', lazy='dynamic')
 
     def __init__(self, name, email, picture_url=None):
         self.name = name
@@ -19,40 +19,31 @@ class User(UserMixin, db.Model):
         self.picture_url = picture_url
 
 
-class Mask(db.Model):
+class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
-    form_factor = db.Column(db.String(32), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-    cards = db.relationship('Transaction', backref='mask', lazy='dynamic')
+    items = db.relationship('Item', backref='category', lazy='dynamic')
 
-    def __init__(self, name, form_factor, quantity, user_id):
+    def __init__(self, name):
         self.name = name
-        self.form_factor = form_factor
-        self.quantity = quantity
-        self.user_id = user_id
 
-class Transaction(db.Model):
+
+class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    description = db.Column(db.String(64), nullable=False)
-    source = db.Column(db.String(64), nullable=False)
-    destination = db.Column(db.String(64), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    date = db.Column(db.DateTime, nullable=False)
+    name = db.Column(db.String(64), nullable=False)
+    description = db.Column(db.String(300), nullable=False)
+    date_added = db.Column(db.DateTime, nullable=False)
 
-    mask_id = db.Column(db.Integer, db.ForeignKey('mask.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
 
-    def __init__(self, desc, src, dest, qty, date, mask_id, user_id):
-        self.description = desc
-        self.source = src
-        self.destination = dest
-        self.quantity = qty
-        self.date = date
-        self.mask_id = mask_id
+    def __init__(self, name, description, user_id, category_id, date_added=None):
+        self.name = name
+        self.description = description
+        self.date_added = date_added or datetime.now().replace(microsecond=0)
         self.user_id = user_id
+        self.category_id = category_id
 
 
 @lm.user_loader

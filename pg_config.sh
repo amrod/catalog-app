@@ -10,7 +10,7 @@ pip install flask==0.9
 pip install Flask-Login==0.1.3
 pip install Flask-SQLAlchemy==2.0
 pip install Flask-WTF
-pip install Lask-OAuth
+pip install Flask-OAuth
 
 rm -f /vagrant/src/inventoryapp/cardinventory.db
 (cd /vagrant/src/ && exec python db_setup.py)

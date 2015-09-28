@@ -1,0 +1,27 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+{% from "_formhelpers.html" import render_field %}
+
+
+<div class="form-group" xmlns="http://www.w3.org/1999/html">
+    <form action="{{ url_for('new_category')}}" method=post>
+    {{ form.hidden_tag() }}
+        <div class="row">
+            <div class="subtitle"><h3>Add Category</h3></div>
+            <div class="col-md-6 padding-top">
+                <dl>
+                    {{ render_field(form.category_name) }}
+                </dl>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 padding-top">
+                <input type=submit value=Save>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
