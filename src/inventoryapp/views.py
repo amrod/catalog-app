@@ -15,16 +15,17 @@ from oauth2client.client import verify_id_token, Error as Oauth2clientError
 import json
 import requests
 
-JSON_CT = {'Content-Type': 'application/json'}
+#JSON_CT = {'Content-Type': 'application/json'}
 GOOGLE_ISS = ('accounts.google.com', 'https://accounts.google.com')
 GOOGLE_WELL_KNOWN = 'https://accounts.google.com/.well-known/openid-configuration'
-GOOGLE_TOKEN_INFO ='https://www.googleapis.com/oauth2/v1/tokeninfo'
-GOOGLE_USER_INFO = 'https://www.googleapis.com/oauth2/v1/userinfo'
+#GOOGLE_TOKEN_INFO ='https://www.googleapis.com/oauth2/v1/tokeninfo'
+#GOOGLE_USER_INFO = 'https://www.googleapis.com/oauth2/v1/userinfo'
 GOOGLE_REVOKE = 'https://accounts.google.com/o/oauth2/revoke'
 GOOGLE_CLIENT_ID = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_id']
 GOOGLE_CLIENT_SECRET = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_secret']
 
 lm.login_view = 'index'
+lm.login_message_category = 'error'
 
 ginfo = requests.get(GOOGLE_WELL_KNOWN).json()
 
@@ -62,8 +63,6 @@ def oauth_authorized(resp):
 
         flash(u'Request to sign in was denied by the user.', 'error')
         return redirect(next_url)
-
-    # print resp
 
     try:
         jwt = verify_id_token(resp['id_token'], GOOGLE_CLIENT_ID)
@@ -160,7 +159,6 @@ def category(category_id):
 def recipe_detail(recipe_id):
 
     item = Item.query.get_or_404(recipe_id)
-    print item
     return render_template('recipe_detail.html', recipe=item)
 
 @app.route('/recipe/new', methods=["GET", "POST"])
@@ -222,37 +220,6 @@ def edit_recipe(recipe_id):
 def delete_recipe(recipe_id):
     return index()
 
-
-
-# @app.route('/recipe/<recipe_id>/add', methods=["GET", "POST"])
-# @login_required
-# def add_item(recipe_id):
-#     form = AddCardsForm()
-#
-#     mask = Category.query.get_or_404(recipe_id)
-#
-#     if mask.user_id != current_user.id:
-#         flash('You do not have permission to add cards for this mask.', 'error')
-#         return redirect(url_for('item_detail', mask_id=recipe_id))
-#
-#     if form.validate_on_submit():
-#         mask.quantity += form.quantity.data
-#         dt = datetime.now().replace(microsecond=0)
-#         trans = Transaction(desc='New cards',
-#                             src=mask.user.name,
-#                             dest=mask.name,
-#                             qty=form.quantity.data,
-#                             date=dt,
-#                             mask_id=recipe_id,
-#                             user_id=mask.user_id)
-#
-#         db.session.add(trans)
-#         db.session.commit()
-#
-#         flash('%s cards added to %s successfully!' % (form.quantity.data, mask.name))
-#         return redirect(url_for('item_detail', mask_id=recipe_id))
-#
-#     return render_template('add_cards.html', form=form, mask=mask)
 
 # Helper functions
 

@@ -1,0 +1,22 @@
+<div class = "flash">
+    {% with messages = get_flashed_messages(category_filter=["message"]) %}
+      {% if messages %}
+        <ul class="flash">
+        {% for message in messages %}
+            <li> {{ message }} </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+</div>
+<div class = "error-flash">
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+      {% if messages %}
+        <ul class="error-flash">
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+</div>
