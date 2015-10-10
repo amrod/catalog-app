@@ -3,7 +3,7 @@ from inventoryapp import db
 from inventoryapp import lm
 
 from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
-from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm
+from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm, DeleteRecipeForm
 from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 
@@ -49,9 +49,11 @@ def login():
     res =  google.authorize(callback=url_for('oauth_authorized', _external=True))
     return res
 
+
 @google.tokengetter
 def get_google_token(token=None):
     return session.get('access_token')
+
 
 @app.route('/authorized')
 @google.authorized_handler
@@ -106,6 +108,7 @@ def oauth_authorized(resp):
     flash(**fmsg)
     return redirect(next_url)
 
+
 @app.route('/logout')
 @login_required
 def logout():
@@ -144,9 +147,10 @@ def logout():
 @app.route('/index')
 @app.route('/')
 def index():
-    recipes = Item.query.all() #order_by(Category.name.asc()).
+    recipes = Item.query.all()  # order_by(Category.name.asc()).
     subtitle='All Recipes'
     return render_template('index.html', recipes=recipes, subtitle=subtitle)
+
 
 @app.route('/category/<category_id>')
 def category(category_id):
@@ -157,9 +161,9 @@ def category(category_id):
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
+    recipe = Item.query.get_or_404(recipe_id)
+    return render_template('recipe_detail.html', recipe=recipe)
 
-    item = Item.query.get_or_404(recipe_id)
-    return render_template('recipe_detail.html', recipe=item)
 
 @app.route('/recipe/new', methods=["GET", "POST"])
 @login_required
@@ -168,14 +172,19 @@ def new_recipe():
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
-        new_recipe = models.Item(name=form.item_name.data, user_id=current_user.id)
+        new_recipe = models.Item(name=form.name.data,
+                                 description=form.description.data,
+                                 category_id=form.category.data,
+                                 user_id=current_user.id)
 
         db.session.add(new_recipe)
         db.session.commit()
         flash("New recipe created successfully!")
-        return redirect(url_for('index'))
+
+        return redirect(url_for('recipe_detail', recipe=new_recipe))
 
     return render_template('new_recipe.html', form=form)
+
 
 @app.route('/recipe/new', methods=["GET", "POST"])
 @login_required
@@ -184,7 +193,7 @@ def new_category():
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
-        new_category = models.Category(name=form.category_name.data)
+        new_category = models.Category(name=form.name.data)
 
         db.session.add(new_category)
         db.session.commit()
@@ -193,32 +202,52 @@ def new_category():
 
     return render_template('new_category.html', form=form)
 
+
 @app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_recipe(recipe_id):
-    form = EditRecipeForm()
-
     recipe = Item.query.get_or_404(recipe_id)
+
+    form = EditRecipeForm(obj=recipe)
+    form.category.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
 
     if recipe.user_id != current_user.id:
         flash('You do not have permission to edit this recipe.', 'error')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
     if form.validate_on_submit():
-        recipe.name = form.recipe_name
-        recipe.description = form.description
-        recipe.category_id  = form.category
+        recipe.name = form.name.data
+        recipe.description = form.description.data
+        recipe.category_id  = form.category.data
         db.session.commit()
 
         flash('Record updated successfully!')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
-    return render_template('edit_recipe.html', form=form, recipe=recipe)
+    # Set current value if rendering form
+    form.category.data = recipe.category_id
+
+    return render_template('edit_recipe.html', form=form, recipe=recipe, subtitle='Edit Recipe')
+
 
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])
 @login_required
 def delete_recipe(recipe_id):
-    return index()
+    recipe = Item.query.get_or_404(recipe_id)
+    form = DeleteRecipeForm()
+
+    if recipe.user_id != current_user.id:
+        flash('You do not have permission to delete this recipe.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    if form.validate_on_submit():
+        db.session.delete(recipe)
+        db.session.commit()
+
+        flash('Recipe {} was deleted.'.format(recipe.name))
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    return render_template('form_delete_recipe.html', form=form, recipe=recipe)
 
 
 # Helper functions
@@ -230,6 +259,7 @@ def reset_user_session_vars(session):
     session.pop('email', None)
     session.pop('token_expires', None)
     session.pop('access_token', None)
+
 
 def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}

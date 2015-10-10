@@ -1,19 +1,19 @@
-{% extends "_main.html" %}
-{% block content %}
-{% include "_header.html" %}
+{% extends "_header.html" %}
 {% from "_formhelpers.html" import render_field %}
 
+{% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
-    <form action="{{ url_for('edit_mask', mask_id=mask.id)}}" method=post>
+    <form action="{{ url_for('edit_recipe', recipe_id=recipe.id)}}" method=post>
     {{ form.hidden_tag() }}
         <div class="row">
-            <div class="subtitle"><h3>Edit</h3></div>
+            <div class="subtitle"><h3>{{subtitle}}</h3></div>
             <br>
             <div class="col-md-6 padding-top">
                 <dl>
-                    {{ render_field(form.mask_name) }}
-                    {{ render_field(form.form_factor) }}
+                    {{ render_field(form.name) }}
+                    {{ render_field(form.description) }}
+                    {{ render_field(form.category) }}
                 </dl>
             </div>
         </div>
