@@ -1,5 +1,5 @@
 {% extends "_header.html" %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field_list, render_field_only %}
 {% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
@@ -10,7 +10,14 @@
             <br>
             <div class="col-md-6 padding-top">
                 <dl>
-                    {{ render_field(form.confirm_delete) }}
+                    {{ form.confirm_delete() }} {{ form.confirm_delete.label }}
+                    {% if form.confirm_delete.errors %}
+                      <ul class="field-errors">
+                          {% for error in form.confirm_delete.errors %}
+                              <li>{{ error }}</li>
+                          {% endfor %}
+                      </ul>
+                    {% endif %}
                 </dl>
             </div>
         </div>

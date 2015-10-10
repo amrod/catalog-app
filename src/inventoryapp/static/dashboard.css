@@ -73,6 +73,12 @@ ul.error-flash {
     list-style: none;
 }
 
+ul.field-errors {
+    list-style-type: none;
+    list-style: none;
+    color: red;
+}
+
 /* Sidebar navigation */
 .nav-sidebar {
     margin-right: -21px; /* 20px padding + 1px border */

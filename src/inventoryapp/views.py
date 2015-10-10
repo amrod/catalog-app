@@ -246,7 +246,7 @@ def delete_recipe(recipe_id):
         db.session.commit()
 
         flash('Recipe {} was deleted.'.format(recipe.name))
-        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+        return redirect(url_for('index'))
 
     return render_template('form_delete_recipe.html', form=form, recipe=recipe)
 

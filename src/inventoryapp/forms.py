@@ -18,6 +18,6 @@ class EditRecipeForm(Form):
 
 
 class DeleteRecipeForm(Form):
-    confirm_delete = BooleanField(u'I confirm I wish to delete this recipe.', [validators.Required()])
+    confirm_delete = BooleanField(u'I confirm I wish to delete this recipe.', [validators.Required("Check the box if you wish to delete this recipe.")])
 
 

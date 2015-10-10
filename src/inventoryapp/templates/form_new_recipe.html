@@ -1,5 +1,5 @@
 {% extends "_header.html" %}
-{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_field_list %}
 
 {% block content %}
 
@@ -14,10 +14,10 @@
 
         <div class="row">
             <div class="col-md-2 padding-top">
-            {{ render_field(form.name, placeholder='Muffuletta Calzones') }}
+            {{ render_field_list(form.name, placeholder='Muffuletta Calzones') }}
             </div>
             <div class="col-md-2 padding-top">
-            {{ render_field(form.category) }}
+            {{ render_field_list(form.category) }}
             </div>
         </div>
 
@@ -25,7 +25,7 @@
             <div class="col-md-6 padding-top">
                 <dl>
 
-                    {{ render_field(form.description,
+                    {{ render_field_list(form.description,
                                     class='recipe-instructions',
                                     placeholder='''Ingredients
 2 tablespoons olive oil, divided
