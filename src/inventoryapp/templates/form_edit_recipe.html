@@ -7,7 +7,7 @@
     <form action="{{ url_for('edit_recipe', recipe_id=recipe.id)}}" method=post>
     {{ form.hidden_tag() }}
         <div class="row">
-            <div class="subtitle"><h3>{{subtitle}}</h3></div>
+            <div class="subtitle"><h3>Edit Recipe</h3></div>
             <br>
             <div class="col-md-6 padding-top">
                 <dl>
@@ -20,7 +20,10 @@
 
         <div class="row">
             <div class="col-md-6 padding-top">
-                <input type=submit value=Save>
+                <input type=submit value="Save" class="btn btn-default">
+                <a href="{{ url_for('recipe_detail', recipe_id=recipe.id)}}" class="btn btn-default" id="edit-item">
+                Cancel
+                </a>
             </div>
         </div>
     </form>
