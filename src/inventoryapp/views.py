@@ -184,7 +184,7 @@ def new_recipe():
 
         return redirect(url_for('recipe_detail', recipe=new_recipe))
 
-    return render_template('new_recipe.html', form=form)
+    return render_template('form_new_recipe.html', form=form)
 
 
 @app.route('/recipe/new', methods=["GET", "POST"])

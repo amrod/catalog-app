@@ -1,11 +1,10 @@
 {% extends "_header.html" %}
 {% from "_formhelpers.html" import render_field %}
-
 {% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <form action="{{ url_for('edit_recipe', recipe_id=recipe.id)}}" method=post>
-    {{ form.hidden_tag() }}
+        {{ form.hidden_tag() }}
         <div class="row">
             <div class="subtitle"><h3>Edit Recipe</h3></div>
             <br>
