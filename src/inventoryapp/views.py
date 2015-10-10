@@ -182,7 +182,7 @@ def new_recipe():
         db.session.commit()
         flash("New recipe created successfully!")
 
-        return redirect(url_for('recipe_detail', recipe=new_recipe))
+        return redirect(url_for('recipe_detail', recipe_id=new_recipe.id))
 
     return render_template('form_new_recipe.html', form=form)
 
