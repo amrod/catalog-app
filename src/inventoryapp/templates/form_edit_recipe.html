@@ -5,15 +5,28 @@
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <form action="{{ url_for('edit_recipe', recipe_id=recipe.id)}}" method=post>
         {{ form.hidden_tag() }}
+
         <div class="row">
-            <div class="subtitle"><h3>Edit Recipe</h3></div>
+            <div class="col-md-6 padding-top">
+                <div class="subtitle"><h3>Edit Recipe</h3></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 padding-top">
+                {{ render_field(form.name) }}
+            </div>
+            <div class="col-md-2 padding-top">
+                {{ render_field(form.category) }}
+            </div>
+        </div>
+
+        <div class="row">
             <br>
             <div class="col-md-6 padding-top">
-                <dl>
-                    {{ render_field(form.name) }}
-                    {{ render_field(form.description) }}
-                    {{ render_field(form.category) }}
-                </dl>
+            <dl>
+                {{ render_field(form.description, class='recipe-instructions') }}
+            </dl>
             </div>
         </div>
 
