@@ -7,19 +7,51 @@
     <form action="{{ url_for('new_recipe')}}" method=post>
     {{ form.hidden_tag() }}
         <div class="row">
+            <div class="col-md-12 padding-top">
             <div class="subtitle"><h3>Add Recipe</h3></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 padding-top">
+            {{ render_field(form.name, placeholder='Muffuletta Calzones') }}
+            </div>
+            <div class="col-md-2 padding-top">
+            {{ render_field(form.category) }}
+            </div>
+        </div>
+{{ render_field(form.category) }}
+        <div class="row">
             <div class="col-md-6 padding-top">
                 <dl>
-                    {{ render_field(form.name) }}
-                    {{ render_field(form.description) }}
-                    {{ render_field(form.category) }}
+
+                    {{ render_field(form.description,
+                                    class='recipe-instructions',
+                                    placeholder='''Ingredients
+2 tablespoons olive oil, divided
+1 cup jarred mixed pickled vegetables, rinsed and finely chopped
+1 (7-oz.) package shredded provolone-Italian cheese blend
+8 thin slices Genoa salami, chopped (about 1/8 lb.)
+1/2 cup diced cooked ham
+1/4 cup sliced pimiento-stuffed Spanish olives
+1 pound bakery pizza dough
+2 tablespoons grated Parmesan cheese
+
+Preparation
+1. Preheat oven to 425°. Stir together 1 Tbsp. olive oil, pickled vegetables, and next 4 ingredients.
+
+2. Place dough on a lightly floured surface. Cut dough into 4 equal pieces. Roll each piece into a 7-inch circle.
+
+3. Place 2 dough circles on a lightly greased baking sheet. Spoon vegetable mixture evenly on top of circles, mounding mixture on dough and leaving a 1-inch border. Moisten edges of dough with water, and top with remaining 2 dough circles. Press and crimp edges to seal. Cut small slits on tops to allow steam to escape. Brush with remaining 1 Tbsp. olive oil, and sprinkle with Parmesan cheese.
+
+4. Bake at 425° for 20 to 24 minutes or until golden brown.''') }}
                 </dl>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-6 padding-top">
-                <input type=submit value=Save>
+                <input type=submit value="Save" class="btn btn-default">
             </div>
         </div>
     </form>
