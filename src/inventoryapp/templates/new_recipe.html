@@ -1,8 +1,7 @@
-{% extends "main.html" %}
-{% block content %}
-{% include "header.html" %}
+{% extends "_header.html" %}
 {% from "_formhelpers.html" import render_field %}
 
+{% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <form action="{{ url_for('new_recipe')}}" method=post>
@@ -12,7 +11,7 @@
             <div class="col-md-6 padding-top">
                 <dl>
                     {{ render_field(form.name) }}
-                    {{ render_field(form.desc) }}
+                    {{ render_field(form.description) }}
                     {{ render_field(form.category) }}
                 </dl>
             </div>

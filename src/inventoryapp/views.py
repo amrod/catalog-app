@@ -169,6 +169,7 @@ def recipe_detail(recipe_id):
 @login_required
 def new_recipe():
     form = NewRecipeForm()
+    form.category.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
@@ -200,7 +201,7 @@ def new_category():
         flash("New category created successfully!")
         return redirect(url_for('index'))
 
-    return render_template('new_category.html', form=form)
+    return render_template('form_new_category.html', form=form)
 
 
 @app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
@@ -227,7 +228,7 @@ def edit_recipe(recipe_id):
     # Set current value if rendering form
     form.category.data = recipe.category_id
 
-    return render_template('edit_recipe.html', form=form, recipe=recipe, subtitle='Edit Recipe')
+    return render_template('form_edit_recipe.html', form=form, recipe=recipe)
 
 
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])

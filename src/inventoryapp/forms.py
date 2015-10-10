@@ -10,6 +10,7 @@ class NewRecipeForm(Form):
     description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=800)])
     category = SelectField(u'Category', coerce=int)
 
+
 class EditRecipeForm(Form):
     name = StringField(u'Title', validators=[validators.Length(min=4, max=25)])
     description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=800)])
@@ -18,6 +19,5 @@ class EditRecipeForm(Form):
 
 class DeleteRecipeForm(Form):
     confirm_delete = BooleanField(u'I confirm I wish to delete this recipe.', [validators.Required()])
-    submit = SubmitField(u'Delete')
 
 
