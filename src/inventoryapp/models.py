@@ -18,6 +18,12 @@ class User(UserMixin, db.Model):
         self.email = email
         self.picture_url = picture_url
 
+    @property
+    def serialize(self):
+        return {'id': self.id,
+                'name': self.name,
+                'email': self.email,
+                'picture_url': self.picture_url}
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -28,6 +34,10 @@ class Category(db.Model):
     def __init__(self, name):
         self.name = name
 
+    @property
+    def serialize(self):
+        return {'id': self.id,
+                'name': self.name}
 
 class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +55,14 @@ class Item(db.Model):
         self.user_id = user_id
         self.category_id = category_id
 
+    @property
+    def serialize(self):
+        return {'id': self.id,
+                'name': self.name,
+                'description': self.description,
+                'date_added': self.date_added,
+                'user_id': self.user_id,
+                'category_id': self.category_id}
 
 @lm.user_loader
 def load_user_from_id(id):

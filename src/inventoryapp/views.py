@@ -251,6 +251,31 @@ def delete_recipe(recipe_id):
     return render_template('form_delete_recipe.html', form=form, recipe=recipe)
 
 
+@app.route('/recipe/JSON')
+def get_all_recipes_json():
+    recipes = Item.query.all()
+    return jsonify(Recipes=[r.serialize for r in recipes])
+
+
+@app.route('/recipe/<recipe_id>/JSON')
+def get_recipe_json(recipe_id):
+    recipe = Item.query.get_or_404(recipe_id)
+    return jsonify(Recipe=recipe.serialize)
+
+
+@app.route('/category/<category_id>/JSON')
+def get_category_recipes_json(category_id):
+    category = Category.query.get_or_404(category_id)
+    recipes = Item.query.filter_by(category_id=category_id).all()
+    return jsonify(Recipes={category.name: [r.serialize for r in recipes]})
+
+
+@app.route('/category/JSON')
+def get_categories_json():
+    categories = Category.query.all()
+    return jsonify(Categories=[c.serialize for c in categories])
+
+
 # Helper functions
 
 def reset_user_session_vars(session):
