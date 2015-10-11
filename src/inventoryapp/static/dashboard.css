@@ -14,6 +14,20 @@ a.navbar-brand {
     font-size: 200%;
 }
 
+.tooltipped + .tooltip > .tooltip-inner {
+    background-color: #9d9d9d;
+    color: #101010;
+    border: 1px #101010;
+    padding: 5px;
+    font-size: 15px;
+    white-space:nowrap;
+    max-width:none;
+}
+
+.tooltipped + .tooltip.bottom > .tooltip-arrow {
+    border-bottom: 5px solid orange;
+}
+
 /*
  * Global add-ons
  */

@@ -5,14 +5,16 @@ from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm, DeleteRecipeForm
 from werkzeug.contrib.atom import AtomFeed
+from werkzeug import secure_filename
 
 import models
-from models import User, Category, Item
+from models import Category, Item
 
 from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
 import json
 import requests
+import os
 from datetime import datetime
 
 #JSON_CT = {'Content-Type': 'application/json'}
@@ -173,6 +175,19 @@ def new_recipe():
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
+
+        if form.photo.has_file():
+            filename = secure_filename(current_user.email + form.photo.data.filename)
+
+            try:
+                fd = models.try_open_file('uploads', filename)
+            except OSError as e:
+                flash("Somethig went wrong. Please contact support.")
+                return redirect(url_for('new_recipe'))
+
+            with os.fdopen(fd, 'w') as file_obj:
+                form.photo.data.save(file_obj)
+
         new_recipe = models.Item(name=form.name.data,
                                  description=form.description.data,
                                  category_id=form.category.data,

@@ -15,6 +15,12 @@
             <ul class="nav navbar-nav navbar-right">
 
                 <li><p class="navbar-text">
+                    <a class="tooltipped" href="{{url_for('recent_feed')}}" data-toggle="tooltip" data-placement="bottom" title="Recent recipes feed">
+                        <img src="/static/rss.png" alt="Recent recipes feed">
+                    </a>
+                </p></li>
+
+                <li><p class="navbar-text">
                 {% if current_user.is_authenticated() %}
                 Signed in as {{current_user.name}} (<a href="{{ url_for('logout') }}">Logout</a>)
                 {% else %}

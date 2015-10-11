@@ -1,6 +1,11 @@
 from inventoryapp import lm
 from flask.ext.login import UserMixin
 from datetime import datetime
+import hashlib
+import os
+import errno
+import random
+import sys
 
 from . import db, app
 
@@ -45,6 +50,7 @@ class Item(db.Model):
     description = db.Column(db.String(300), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
+    photo = db.Column(db.String(40), nullable=True)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
@@ -53,7 +59,7 @@ class Item(db.Model):
         self.name = name
         self.description = description
         self.created_at = created_at or datetime.now().replace(microsecond=0)
-        self.updated_at = created_at
+        self.updated_at = self.created_at
         self.user_id = user_id
         self.category_id = category_id
 
@@ -65,6 +71,8 @@ class Item(db.Model):
                 'date_added': self.created_at,
                 'user_id': self.user_id,
                 'category_id': self.category_id}
+
+# Helper functions
 
 @lm.user_loader
 def load_user_from_id(id):
@@ -114,4 +122,32 @@ def load_user(session):
 
     return user
 
+def try_open_file(target_dir, basename=None):
+    '''
+    Attempts to create a file in the filesystem avoiding race condition.
+    :param target_dir: the target directory where tho save the file
+    :basename: a seed name for the file.
+    :return: file descriptor as returned by os.open()
+    '''
+    flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
 
+    if not basename:
+        basename = ''
+
+    basename = scramble_name(str(random.randint(0, sys.maxint)) + basename)
+    dest = os.path.join(target_dir, basename)
+
+    try:
+        fh = os.open(dest, flags)
+    except OSError as e:
+        if e.errno == errno.EEXIST:  # Failed as the file already exists.
+            try_open_file(target_dir, basename)
+        else:  # Something unexpected went wrong so reraise the exception.
+            raise
+    else:  # No exception, so the file must have been created successfully.
+        return fh
+
+
+def scramble_name(basename):
+    ext = os.path.splitext(basename)[1]
+    return hashlib.sha1(basename).hexdigest() + ext
