@@ -8,6 +8,12 @@ body {
 }
 
 
+a.navbar-brand {
+    font-family: 'Lobster Two', cursive;
+    font-style: italic;
+    font-size: 200%;
+}
+
 /*
  * Global add-ons
  */
@@ -78,6 +84,7 @@ ul.field-errors {
     list-style: none;
     color: red;
 }
+
 
 /* Sidebar navigation */
 .nav-sidebar {

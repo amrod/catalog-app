@@ -17,6 +17,6 @@
 <h2 class="sub-header">{{ recipe.name }}</h2>
 <p class="sub-header">{{ recipe.description }}</p>
 <p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
-<p class="footnote">Date added: {{ recipe.date_added }}</p>
+<p class="footnote">Date added: {{ recipe.created_at.strftime('%A, %B %-d, %Y') }}</p>
 
 {% endblock %}

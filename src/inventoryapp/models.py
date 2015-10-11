@@ -43,15 +43,17 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.String(300), nullable=False)
-    date_added = db.Column(db.DateTime, nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=False)
 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
 
-    def __init__(self, name, description, user_id, category_id, date_added=None):
+    def __init__(self, name, description, user_id, category_id, created_at=None):
         self.name = name
         self.description = description
-        self.date_added = date_added or datetime.now().replace(microsecond=0)
+        self.created_at = created_at or datetime.now().replace(microsecond=0)
+        self.updated_at = created_at
         self.user_id = user_id
         self.category_id = category_id
 
@@ -60,7 +62,7 @@ class Item(db.Model):
         return {'id': self.id,
                 'name': self.name,
                 'description': self.description,
-                'date_added': self.date_added,
+                'date_added': self.created_at,
                 'user_id': self.user_id,
                 'category_id': self.category_id}
 

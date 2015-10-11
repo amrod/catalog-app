@@ -1,11 +1,10 @@
-from inventoryapp import app
-from inventoryapp import db
-from inventoryapp import lm
+from inventoryapp import app, db, lm
 
 from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
-from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm, DeleteRecipeForm
 from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
+from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm, DeleteRecipeForm
+from werkzeug.contrib.atom import AtomFeed
 
 import models
 from models import User, Category, Item
@@ -14,6 +13,7 @@ from oauth2client.client import verify_id_token, Error as Oauth2clientError
 
 import json
 import requests
+from datetime import datetime
 
 #JSON_CT = {'Content-Type': 'application/json'}
 GOOGLE_ISS = ('accounts.google.com', 'https://accounts.google.com')
@@ -220,6 +220,7 @@ def edit_recipe(recipe_id):
         recipe.name = form.name.data
         recipe.description = form.description.data
         recipe.category_id  = form.category.data
+        recipe.updated_at = datetime.now().replace(microsecond=0)
         db.session.commit()
 
         flash('Record updated successfully!')
@@ -274,6 +275,24 @@ def get_category_recipes_json(category_id):
 def get_categories_json():
     categories = Category.query.all()
     return jsonify(Categories=[c.serialize for c in categories])
+
+@app.route('/recipe/recent.atom')
+def recent_feed():
+
+    recipes = Item.query.order_by(Item.created_at.desc()).limit(15).all()
+
+    feed = AtomFeed('Recent Recipes', feed_url=request.url, url=request.url_root)
+
+    for recipe in recipes:
+
+        feed.add(recipe.name, recipe.description,
+                 url=url_for('recipe_detail', recipe_id=recipe.id, _external=True),
+                 content_type='text/plain',
+                 author=recipe.user.name,
+                 updated=recipe.updated_at,
+                 date_added=recipe.created_at)
+
+    return feed.get_response()
 
 
 # Helper functions
