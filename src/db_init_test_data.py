@@ -1,6 +1,6 @@
-import inventoryapp
+import catalogapp
 from datetime import datetime
-from inventoryapp.models import User, Category, Item
+from catalogapp.models import User, Category, Item
 
 if __name__ == '__main__':
 
@@ -20,7 +20,7 @@ if __name__ == '__main__':
              {'user_id': 4,'category_id': 3, 'name': 'Tostones'         , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 2)},
              {'user_id': 4,'category_id': 4, 'name': 'Salmon Burgers'   , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 3, 1)},]
 
-    db = inventoryapp.db
+    db = catalogapp.db
     db.create_all()
 
     for kwargs in users:

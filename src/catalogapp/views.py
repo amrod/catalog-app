@@ -1,4 +1,4 @@
-from inventoryapp import app, db, lm
+from catalogapp import app, db, lm
 
 from flask import render_template, redirect, url_for, request, jsonify, flash, session
 from flask import abort

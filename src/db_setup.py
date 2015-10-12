@@ -1,8 +1,8 @@
-import inventoryapp
+import catalogapp
 
 if __name__ == '__main__':
     """Create database"""
 
-    db = inventoryapp.db
+    db = catalogapp.db
     db.create_all()
     db.session.commit()
