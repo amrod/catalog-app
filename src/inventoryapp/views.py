@@ -161,22 +161,24 @@ def logout():
 def index():
     recipes = Item.query.all()  # order_by(Category.name.asc()).
     subtitle='All Recipes'
-    return render_template('index.html', recipes=recipes, subtitle=subtitle)
+    return render_template('index.html', recipes=recipes, subtitle=subtitle,
+                           stats=get_stats())
 
 
 @app.route('/category/<category_id>')
 def category(category_id):
     recipes = Item.query.filter_by(category_id=category_id).all()
     category = Category.query.get(category_id)
-    return render_template(
-        'index.html', recipes=recipes, subtitle=category.name)
+    return render_template('index.html', recipes=recipes,
+                           subtitle=category.name, stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
     recipe = Item.query.get_or_404(recipe_id)
     photo = models.load_image_base64(recipe.photo)
-    return render_template('recipe_detail.html', recipe=recipe, photo=photo)
+    return render_template('recipe_detail.html', recipe=recipe, photo=photo,
+                           stats=get_stats())
 
 
 @app.route('/recipe/new', methods=["GET", "POST"])
@@ -208,7 +210,8 @@ def new_recipe():
 
         return redirect(url_for('recipe_detail', recipe_id=new_recipe.id))
 
-    return render_template('form_new_recipe.html', form=form)
+    return render_template('form_new_recipe.html', form=form,
+                           stats=get_stats())
 
 
 @app.route('/recipe/new', methods=["GET", "POST"])
@@ -225,7 +228,8 @@ def new_category():
         flash("New category created successfully!")
         return redirect(url_for('index'))
 
-    return render_template('form_new_category.html', form=form)
+    return render_template('form_new_category.html', form=form,
+                           stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
@@ -264,7 +268,8 @@ def edit_recipe(recipe_id):
     form.category.data = recipe.category_id
     photo = models.load_image_base64(recipe.photo)
 
-    return render_template('form_edit_recipe.html', form=form, recipe=recipe, photo=photo)
+    return render_template('form_edit_recipe.html', form=form, recipe=recipe,
+                           photo=photo, stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])
@@ -285,7 +290,8 @@ def delete_recipe(recipe_id):
         flash('Recipe {} was deleted.'.format(recipe.name))
         return redirect(url_for('index'))
 
-    return render_template('form_delete_recipe.html', form=form, recipe=recipe)
+    return render_template('form_delete_recipe.html', form=form, recipe=recipe,
+                           stats=get_stats())
 
 @app.route('/recipe/<recipe_id>/photo/delete', methods=["GET", "POST"])
 @login_required
@@ -309,7 +315,7 @@ def recipe_photo(recipe_id):
         abort(404)
 
     photo = models.load_image_base64(recipe.photo)
-    return render_template("photo.html", photo=photo)
+    return render_template("photo.html", photo=photo, stats=get_stats())
 
 
 @app.route('/recipe/JSON')
@@ -379,9 +385,15 @@ def save_photo(form):
 
     return filepath
 
-
 def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}
+
+def get_stats():
+    stats = {
+        'recipes': Item.query.count(),
+        'categories': Category.query.count()
+    }
+    return stats
 
 @app.template_filter()
 @evalcontextfilter

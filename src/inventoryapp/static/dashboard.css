@@ -84,21 +84,29 @@ a.navbar-brand {
 }
 
 ul.flash {
-    list-style-type: none;
     list-style: none;
 }
 
 ul.error-flash {
-    list-style-type: none;
     list-style: none;
 }
 
 ul.field-errors {
-    list-style-type: none;
     list-style: none;
     color: red;
 }
 
+h1.featured {
+    font-weight: 900;
+    font-size: 300%;
+    text-shadow: 4px 4px 4px #aaa;
+    font-style: italic;
+}
+
+span.text-muted {
+    font-size: 120%;
+    font-style: italic;
+}
 
 /* Sidebar navigation */
 .nav-sidebar {
