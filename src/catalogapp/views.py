@@ -162,13 +162,19 @@ def index():
                            stats=get_stats())
 
 
-@app.route('/category/<category_id>')
-def category(category_id):
-    recipes = Item.query.filter_by(category_id=category_id).all()
-    category = Category.query.get(category_id)
+@app.route('/cuisine/<cuisine_id>')
+def cuisine(cuisine_id):
+    recipes = Item.query.filter_by(category_id=cuisine_id).all()
+    cuisine = Category.query.get(cuisine_id)
     return render_template('index.html', recipes=recipes,
-                           subtitle=category.name, stats=get_stats())
+                           subtitle=cuisine.name, stats=get_stats())
 
+@app.route('/cuisines')
+def cuisines():
+    cuisines = Category.query.all()
+    subtitle = 'All Cuisines'
+    return render_template('index.html', cuisines=cuisines,
+                           subtitle=subtitle, stats=get_stats())
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
@@ -211,9 +217,9 @@ def new_recipe():
                            stats=get_stats())
 
 
-@app.route('/category/new', methods=["GET", "POST"])
+@app.route('/cuisine/new', methods=["GET", "POST"])
 @login_required
-def new_category():
+def new_cuisine():
     form = NewCategoryForm()
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
@@ -316,7 +322,7 @@ def recipe_photo(recipe_id):
 
 
 @app.route('/recipe/JSON')
-def get_all_recipes_json():
+def get_all_recipecategorys_json():
     recipes = Item.query.all()
     return jsonify(Recipes=[r.serialize for r in recipes])
 
@@ -327,14 +333,14 @@ def get_recipe_json(recipe_id):
     return jsonify(Recipe=recipe.serialize)
 
 
-@app.route('/category/<category_id>/JSON')
-def get_category_recipes_json(category_id):
-    category = Category.query.get_or_404(category_id)
-    recipes = Item.query.filter_by(category_id=category_id).all()
+@app.route('/cuisine/<cuisine_id>/JSON')
+def get_category_recipes_json(cuisine_id):
+    category = Category.query.get_or_404(cuisine_id)
+    recipes = Item.query.filter_by(category_id=cuisine_id).all()
     return jsonify(Recipes={category.name: [r.serialize for r in recipes]})
 
 
-@app.route('/category/JSON')
+@app.route('/cuisine/JSON')
 def get_categories_json():
     categories = Category.query.all()
     return jsonify(Categories=[c.serialize for c in categories])
@@ -388,7 +394,7 @@ def make_flash_params(message, category='message'):
 def get_stats():
     stats = {
         'recipes': Item.query.count(),
-        'categories': Category.query.count()
+        'cuisines': Category.query.count()
     }
     return stats
 

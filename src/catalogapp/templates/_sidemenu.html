@@ -1,7 +1,8 @@
 <div class="col-sm-3 col-md-2 sidebar">
     <ul class="nav nav-sidebar">
-        <li ><a href="{{url_for('index')}}">All Recipes <span class="sr-only">(current)</span></a></li>
-        <li><a href="{{url_for('recent_feed')}}">RSS Feed</a></li>
+        <li ><a href="{{url_for('index')}}">All Recipes</a></li>
+        <li ><a href="{{url_for('cuisines')}}">All Cuisines</a></li>
+        <li><a href="{{url_for('recent_feed')}}">RSS Feed </a></li>
 
     </ul>
 
@@ -15,7 +16,7 @@
             </a>
         </li>
         <li>
-            <a href="{{ url_for('new_category') }}" class="btn btn-default" id="add-cuisine">
+            <a href="{{ url_for('new_cuisine') }}" class="btn btn-default" id="add-cuisine">
                 <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Cuisine
             </a>
         </li>
