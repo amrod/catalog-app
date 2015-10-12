@@ -10,9 +10,9 @@ if __name__ == '__main__':
              {'name': 'TestUser 4', 'email': 'test4@example.net'}]
 
     categories = [{'name': 'Chinese'},
-                  {'name': 'Breads'},
+                  {'name': 'Japanese'},
                   {'name': 'Dominican'},
-                  {'name': 'Salmon'}]
+                  {'name': 'Mexican'}]
 
     items = [{'user_id': 2,'category_id': 1, 'name': "General Tso's"    , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'created_at': datetime(2015, 1, 6)},
              {'user_id': 2,'category_id': 1, 'name': 'Chop Suey'        , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.', 'created_at': datetime(2015, 9, 1)},

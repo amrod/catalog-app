@@ -214,7 +214,7 @@ def new_recipe():
                            stats=get_stats())
 
 
-@app.route('/recipe/new', methods=["GET", "POST"])
+@app.route('/category/new', methods=["GET", "POST"])
 @login_required
 def new_category():
     form = NewCategoryForm()
