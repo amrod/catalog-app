@@ -294,6 +294,7 @@ def delete_recipe(recipe_id):
         flash('You do not have permission to delete this recipe.', 'error')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
         models.delete_file(recipe.photo)
         db.session.delete(recipe)
