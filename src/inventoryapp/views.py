@@ -278,6 +278,7 @@ def delete_recipe(recipe_id):
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
     if form.validate_on_submit():
+        models.delete_file(recipe.photo)
         db.session.delete(recipe)
         db.session.commit()
 

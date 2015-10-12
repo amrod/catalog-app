@@ -24,9 +24,11 @@
                     <div class="col-md-3 padding-top">
                         {{ render_field_list(form.photo) }}
 
+                        {% if photo|length > 0: %}
                          <a href="{{ url_for('delete_photo', recipe_id=recipe.id)}}">
                              Delete photo
                          </a>
+                        {% endif %}
                     </div>
                 </div>
 
