@@ -10,10 +10,11 @@ delete their own items.
   1. Install Vagrant and VirtualBox.
   2. Launch the Vagrant VM. A Vagrantfile and accompanying shell script are provided to setup all necessary software.
 2. If not using Vagrant, you can just run the provided `pg_config.sh` script to setup all necessary software.
+  Optional: Run the `db_init_test_data.py` script to populate the database with some test data 
+3. Obtain OAuth 2.0 client credentials from the Google Developers Console. Details **[here](https://developers.google.com/identity/protocols/OAuth2)**.
+4. Download the `client_secrets.json` file from the Google Developer Console and store it under `catalogapp/instance/`
+5. Run `run.py` to start the local Flask development server. By default, the application is available on port 5000.
 
-Optional: Run the `db_init_test_data.py` script to populate the database with some test data 
-
-3. Run `run.py` to start the local Flask development server. By default, the application is available on port 5000.
 
 ## Using the Recipe Catalog
 

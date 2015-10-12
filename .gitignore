@@ -1,6 +1,6 @@
 src/instance/*
 .idea/*
 test_config.sh
-src/inventoryapp/cardinventory.db
+*.db
 *.pyc
 /.vagrant/*
