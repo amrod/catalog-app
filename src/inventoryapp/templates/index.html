@@ -1,20 +1,13 @@
 {% extends "_header.html" %}
 {% block content %}
 
-<div class="row text-center">
-<div class="col-md-12 padding-top">
-    {% if current_user.is_authenticated() %}
-    <a href="{{ url_for('new_recipe') }}" class="btn btn-default" id="edit-item">
-        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Add Recipe
-    </a>
-    <a href="{{ url_for('new_category') }}" class="btn btn-default" id="add-cuisine">
-        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>Add Cuisine
-    </a>
-    {% endif %}
-</div>
+<div class="row">
+    <div class="col-md-12 padding-top">
+        <h2 class="sub-header">{{subtitle}}</h2>
+    </div>
 </div>
 
-<h2 class="sub-header">{{subtitle}}</h2>
+
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>

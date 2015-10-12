@@ -21,11 +21,8 @@ import re
 
 from datetime import datetime
 
-#JSON_CT = {'Content-Type': 'application/json'}
 GOOGLE_ISS = ('accounts.google.com', 'https://accounts.google.com')
 GOOGLE_WELL_KNOWN = 'https://accounts.google.com/.well-known/openid-configuration'
-#GOOGLE_TOKEN_INFO ='https://www.googleapis.com/oauth2/v1/tokeninfo'
-#GOOGLE_USER_INFO = 'https://www.googleapis.com/oauth2/v1/userinfo'
 GOOGLE_REVOKE = 'https://accounts.google.com/o/oauth2/revoke'
 GOOGLE_CLIENT_ID = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_id']
 GOOGLE_CLIENT_SECRET = json.loads(open('./instance/client_secrets.json', 'r').read())['web']['client_secret']
@@ -402,7 +399,8 @@ def nl2br(eval_ctx, value):
     A nl2br (newline to <BR>) filter
     Source: http://flask.pocoo.org/snippets/28/
     """
-    _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+    _paragraph_re = re.compile(r'(?:\r\n|\r|\n){1,}')
+
     result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n') \
         for p in _paragraph_re.split(escape(value)))
     if eval_ctx.autoescape:
