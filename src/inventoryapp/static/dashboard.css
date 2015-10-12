@@ -146,6 +146,10 @@ p.footnote {
     font-size: 80%;
 }
 
+div.recipe-image {
+    padding-top: 20px;
+}
+
 /*
  * Placeholder dashboard ideas
  */

@@ -14,7 +14,7 @@ class NewRecipeForm(Form):
                        validators=[validators.Length(min=4, max=25,
                                                      message=u'Name must be between 4 and 25 characters long.')])
 
-    description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=800)])
+    description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=2000)])
     category = SelectField(u'Category', coerce=int)
 
     photo = FileField(u'Photo', validators=[
@@ -25,8 +25,7 @@ class NewRecipeForm(Form):
 class EditRecipeForm(Form):
     name = StringField(u'Title', validators=[validators.Length(min=4, max=25,
                                                              message=u'Name must be between 4 and 25 characters long.')])
-    description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=800,
-                                                     message=u'Description must be between 3 and 800 characters long.')])
+    description = TextAreaField(u'Instructions', validators=[validators.Length(min=3, max=2000)])
     category = SelectField(u'Category', coerce=int)
 
 

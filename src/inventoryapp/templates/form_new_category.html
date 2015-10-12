@@ -1,8 +1,6 @@
-{% extends "main.html" %}
-{% block content %}
-{% include "header.html" %}
+{% extends "_header.html" %}
 {% from "_formhelpers.html" import render_field_list %}
-
+{% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <form action="{{ url_for('new_category')}}" method=post>

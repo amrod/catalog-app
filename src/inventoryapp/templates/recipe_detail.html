@@ -1,8 +1,8 @@
 {% extends "_header.html" %}
 {% block content %}
 
-<div class="row text-center">
-<div class="col-md-12 padding-top">
+<div class="row text-right">
+<div class="col-md-6 padding-top">
     {% if current_user.is_authenticated() %}
     <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}" class="btn btn-default" id="edit-item">
         <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>Edit
@@ -14,9 +14,23 @@
 </div>
 </div>
 
-<h2 class="sub-header">{{ recipe.name }}</h2>
-<p class="sub-header">{{ recipe.description }}</p>
-<p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
-<p class="footnote">Date added: {{ recipe.created_at.strftime('%A, %B %-d, %Y') }}</p>
+<div class="row">
+    <div class="col-md-6 padding-top">    
+        <h2 class="sub-header">{{ recipe.name }}</h2>
+        <div class="sub-header">
+            <p >{{ recipe.description|nl2br() }}</p>
+        </div>
+        <p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
+        <p class="footnote">Date added: {{ recipe.created_at.strftime('%A, %B %-d, %Y') }}</p>
+    </div>
+    <div class="col-md-6 padding-top">
 
+        {% if photo|length > 0: %}
+            <div class="recipe-image">
+                <img class="img-responsive img-rounded" src="data:image/jpeg;base64,{{photo}}">
+            </div>
+        {% endif %}
+    </div>
+    
+</div>
 {% endblock %}

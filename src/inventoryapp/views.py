@@ -1,11 +1,13 @@
 from inventoryapp import app, db, lm
 
-from flask import render_template, redirect, url_for, request, jsonify, flash, session, make_response
+from flask import render_template, redirect, url_for, request, jsonify, flash, session
+from flask import abort
 from flask_oauth import OAuth
 from flask.ext.login import current_user, login_user, logout_user, login_required
 from forms import NewRecipeForm, EditRecipeForm, NewCategoryForm, DeleteRecipeForm
 from werkzeug.contrib.atom import AtomFeed
 from werkzeug import secure_filename
+from jinja2 import evalcontextfilter, Markup, escape
 
 import models
 from models import Category, Item
@@ -15,6 +17,8 @@ from oauth2client.client import verify_id_token, Error as Oauth2clientError
 import json
 import requests
 import os
+import re
+
 from datetime import datetime
 
 #JSON_CT = {'Content-Type': 'application/json'}
@@ -88,7 +92,8 @@ def oauth_authorized(resp):
     stored_gplus_id = session.get('gplus_id')
 
     if stored_token is not None and jwt.get('sub') == stored_gplus_id:
-        fmsg = make_flash_params(u'Current user is already connected.', 'error')
+        fmsg = make_flash_params(
+            u'Current user is already connected.', 'error')
 
     if fmsg is None:
         # No errors up to this point, user can be authenticated
@@ -101,11 +106,15 @@ def oauth_authorized(resp):
         user = models.load_user(session)
 
         if user:
-            login_user(user, remember=True)  # To manage logged in users with Flask-Login
-            fmsg = make_flash_params(u'You were signed in as %s.' % jwt.get('name'))
+            # Mng logged in users with Flask-Login
+            login_user(user, remember=True)
+            fmsg = make_flash_params(
+                u'You were signed in as %s.' % jwt.get('name'))
         else:
             reset_user_session_vars(session)
-            fmsg = make_flash_params(u'Error registering user %s in the database.' % jwt.get('name'), 'error')
+            fmsg = make_flash_params(
+                u'Error registering user %s in the database.' % jwt.get('name'),
+                'error')
 
     flash(**fmsg)
     return redirect(next_url)
@@ -138,7 +147,8 @@ def logout():
 
     elif result:
         # For whatever reason, the given token was invalid.
-        fmsg = make_flash_params(u'Failed to revoke token for given user.', 'error')
+        fmsg = make_flash_params(u'Failed to revoke token for given user.',
+                                 'error')
 
     if fmsg:
         flash(**fmsg)
@@ -158,29 +168,36 @@ def index():
 def category(category_id):
     recipes = Item.query.filter_by(category_id=category_id).all()
     category = Category.query.get(category_id)
-    return render_template('index.html', recipes=recipes, subtitle=category.name)
+    return render_template(
+        'index.html', recipes=recipes, subtitle=category.name)
 
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
     recipe = Item.query.get_or_404(recipe_id)
-    return render_template('recipe_detail.html', recipe=recipe)
+    photo = models.load_image_base64(recipe.photo)
+    return render_template('recipe_detail.html', recipe=recipe, photo=photo)
 
 
 @app.route('/recipe/new', methods=["GET", "POST"])
 @login_required
 def new_recipe():
     form = NewRecipeForm()
-    form.category.choices = [(c.id, c.name) for c in Category.query.order_by('name')]
+    form.category.choices = [(c.id, c.name)
+                             for c in Category.query.order_by('name')]
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
+        filepath = None
 
         if form.photo.has_file():
-            filename = secure_filename(current_user.email + form.photo.data.filename)
+            orig_name = secure_filename(current_user.email +
+                                       form.photo.data.filename)
 
             try:
-                fd = models.try_open_file('uploads', filename)
+                fd, filepath = models.try_open_file(
+                    app.config['UPLOAD_FOLDER'], orig_name)
+
             except OSError as e:
                 flash("Somethig went wrong. Please contact support.")
                 return redirect(url_for('new_recipe'))
@@ -191,7 +208,8 @@ def new_recipe():
         new_recipe = models.Item(name=form.name.data,
                                  description=form.description.data,
                                  category_id=form.category.data,
-                                 user_id=current_user.id)
+                                 user_id=current_user.id,
+                                 photo=filepath)
 
         db.session.add(new_recipe)
         db.session.commit()
@@ -238,7 +256,7 @@ def edit_recipe(recipe_id):
         recipe.updated_at = datetime.now().replace(microsecond=0)
         db.session.commit()
 
-        flash('Record updated successfully!')
+        flash('Record updated photo=filepath)successfully!')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
     # Set current value if rendering form
@@ -265,6 +283,15 @@ def delete_recipe(recipe_id):
         return redirect(url_for('index'))
 
     return render_template('form_delete_recipe.html', form=form, recipe=recipe)
+
+@app.route('/recipe/<recipe_id>/photo')
+def recipe_photo(recipe_id):
+    recipe = Item.query.get(recipe_id)
+    if not recipe.photo:
+        abort(404)
+
+    photo = models.load_image_base64(recipe.photo)
+    return render_template("photo.html", photo=photo)
 
 
 @app.route('/recipe/JSON')
@@ -323,3 +350,17 @@ def reset_user_session_vars(session):
 
 def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}
+
+@app.template_filter()
+@evalcontextfilter
+def nl2br(eval_ctx, value):
+    """
+    A nl2br (newline to <BR>) filter
+    Source: http://flask.pocoo.org/snippets/28/
+    """
+    _paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n') \
+        for p in _paragraph_re.split(escape(value)))
+    if eval_ctx.autoescape:
+        result = Markup(result)
+    return result
