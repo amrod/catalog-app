@@ -61,7 +61,12 @@ def get_google_token(token=None):
 @app.route('/authorized')
 @google.authorized_handler
 def oauth_authorized(resp):
-
+    """
+    Handles authentication after the user has authorized via Google. Sets up session
+    variables with user's information. Creates a local user entry if necessary.
+    :param resp:
+    :return:
+    """
     next_url = url_for('index')
 
     if resp is None:
@@ -100,6 +105,7 @@ def oauth_authorized(resp):
         session['token_expires'] = jwt.get('exp')
         session['access_token'] = resp['access_token']
 
+        # Get or create user
         user = models.load_user(session)
 
         if user:
@@ -120,6 +126,9 @@ def oauth_authorized(resp):
 @app.route('/logout')
 @login_required
 def logout():
+    '''
+    Removes the users's data from the session and logs the user out.
+    '''
 
     access_token = session.get('access_token')
     result = None
@@ -367,7 +376,7 @@ def recent_feed():
 # Helper functions
 
 def reset_user_session_vars(session):
-    # Reset the user's session variables
+    '''Resets the user's session variables'''
     session.pop('name', None)
     session.pop('picture', None)
     session.pop('email', None)
@@ -392,6 +401,7 @@ def make_flash_params(message, category='message'):
     return {'message': message, 'category': category}
 
 def get_stats():
+    '''Get counts of database items.'''
     stats = {
         'recipes': Item.query.count(),
         'cuisines': Category.query.count()
