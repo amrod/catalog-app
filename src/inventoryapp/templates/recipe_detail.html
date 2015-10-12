@@ -15,13 +15,20 @@
 </div>
 
 <div class="row">
-    <div class="col-md-6 padding-top">    
-        <h2 class="sub-header">{{ recipe.name }}</h2>
-        <div class="sub-header">
-            <p >{{ recipe.description|nl2br() }}</p>
+    <div class="col-md-6 padding-top">
+        <div class="row">
+            <h2 class="sub-header">{{ recipe.name }}</h2>
         </div>
-        <p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
-        <p class="footnote">Date added: {{ recipe.created_at.strftime('%A, %B %-d, %Y') }}</p>
+
+        <div class="row">
+            <div class="sub-header">
+                <p >{{ recipe.description|nl2br() }}</p>
+            </div>
+        </div>
+        <div class="row">
+            <p class="footnote">Filed under: <a href="{{ url_for('category', category_id=recipe.category.id) }}">{{ recipe.category.name }}</a></p>
+            <p class="footnote">Date added: {{ recipe.created_at.strftime('%A, %B %-d, %Y') }}</p>
+        </div>
     </div>
     <div class="col-md-6 padding-top">
 

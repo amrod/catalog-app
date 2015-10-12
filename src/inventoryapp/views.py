@@ -188,22 +188,13 @@ def new_recipe():
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
-        filepath = None
 
-        if form.photo.has_file():
-            orig_name = secure_filename(current_user.email +
-                                       form.photo.data.filename)
+        try:
+            filepath = save_photo(form)
 
-            try:
-                fd, filepath = models.try_open_file(
-                    app.config['UPLOAD_FOLDER'], orig_name)
-
-            except OSError as e:
-                flash("Somethig went wrong. Please contact support.")
-                return redirect(url_for('new_recipe'))
-
-            with os.fdopen(fd, 'w') as file_obj:
-                form.photo.data.save(file_obj)
+        except OSError as e:
+            flash("Something went wrong. Please contact support.")
+            return redirect(url_for('new_recipe'))
 
         new_recipe = models.Item(name=form.name.data,
                                  description=form.description.data,
@@ -250,19 +241,30 @@ def edit_recipe(recipe_id):
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
     if form.validate_on_submit():
+
+        try:
+            filepath = save_photo(form)
+
+        except OSError as e:
+            flash("Something went wrong. Please contact support.")
+            return redirect(url_for('edit_recipe'))
+
         recipe.name = form.name.data
         recipe.description = form.description.data
         recipe.category_id  = form.category.data
         recipe.updated_at = datetime.now().replace(microsecond=0)
+        if filepath:
+            recipe.photo = filepath
         db.session.commit()
 
-        flash('Record updated photo=filepath)successfully!')
+        flash('Record updated successfully!')
         return redirect(url_for('recipe_detail', recipe_id=recipe_id))
 
     # Set current value if rendering form
     form.category.data = recipe.category_id
+    photo = models.load_image_base64(recipe.photo)
 
-    return render_template('form_edit_recipe.html', form=form, recipe=recipe)
+    return render_template('form_edit_recipe.html', form=form, recipe=recipe, photo=photo)
 
 
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])
@@ -283,6 +285,21 @@ def delete_recipe(recipe_id):
         return redirect(url_for('index'))
 
     return render_template('form_delete_recipe.html', form=form, recipe=recipe)
+
+@app.route('/recipe/<recipe_id>/photo/delete', methods=["GET", "POST"])
+@login_required
+def delete_photo(recipe_id):
+    recipe = Item.query.get_or_404(recipe_id)
+
+    if recipe.user_id != current_user.id:
+        flash('You do not have permission to delete this recipe photo.', 'error')
+        return redirect(url_for('recipe_detail', recipe_id=recipe_id))
+
+    models.delete_file(recipe.photo)
+    recipe.photo = None
+    db.session.commit()
+
+    return redirect(url_for('edit_recipe', recipe_id=recipe.id))
 
 @app.route('/recipe/<recipe_id>/photo')
 def recipe_photo(recipe_id):
@@ -346,6 +363,20 @@ def reset_user_session_vars(session):
     session.pop('email', None)
     session.pop('token_expires', None)
     session.pop('access_token', None)
+
+
+def save_photo(form):
+    orig_name = secure_filename(current_user.email + form.photo.data.filename)
+    filepath = None
+
+    if form.photo.has_file():
+        fd, filepath = models.try_open_file(
+            app.config['UPLOAD_FOLDER'], orig_name)
+
+        with os.fdopen(fd, 'w') as file_obj:
+            form.photo.data.save(file_obj)
+
+    return filepath
 
 
 def make_flash_params(message, category='message'):

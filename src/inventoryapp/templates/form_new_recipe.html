@@ -1,26 +1,26 @@
 {% extends "_header.html" %}
 {% from "_formhelpers.html" import render_field_list %}
-
 {% block content %}
 
 <div class="form-group" xmlns="http://www.w3.org/1999/html">
     <form action="{{ url_for('new_recipe')}}" method="POST" enctype="multipart/form-data">
-    {{ form.hidden_tag() }}
+        {{ form.hidden_tag() }}
+
         <div class="row">
             <div class="col-md-12 padding-top">
-            <div class="subtitle"><h3>Add Recipe</h3></div>
+                <div class="subtitle"><h3>Add Recipe</h3></div>
             </div>
         </div>
 
         <div class="row">
             <div class="col-md-2 padding-top">
-            {{ render_field_list(form.name, placeholder='Muffuletta Calzones') }}
+                {{ render_field_list(form.name, placeholder='Muffuletta Calzones') }}
             </div>
             <div class="col-md-2 padding-top">
-            {{ render_field_list(form.category) }}
+                {{ render_field_list(form.category, class="btn btn-default") }}
             </div>
             <div class="col-md-2 padding-top">
-            {{ render_field_list(form.photo) }}
+                {{ render_field_list(form.photo) }}
             </div>
         </div>
 

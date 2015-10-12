@@ -164,6 +164,7 @@ def scramble_name(basename):
     ext = os.path.splitext(basename)[1]
     return hashlib.sha1(basename).hexdigest() + ext
 
+
 def load_image_base64(p):
 
     try:
@@ -173,3 +174,9 @@ def load_image_base64(p):
         return img_str
     except (EnvironmentError, TypeError) as e:
         return u''
+
+def delete_file(p):
+    try:
+        os.remove(p)
+    except EnvironmentError:
+        pass
