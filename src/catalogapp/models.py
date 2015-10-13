@@ -231,6 +231,8 @@ def delete_file(p):
     :param p: path to the file to be deleted.
     :return: None
     '''
+    if not p:
+        return
     try:
         os.remove(p)
     except EnvironmentError:

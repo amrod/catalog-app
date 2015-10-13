@@ -26,9 +26,10 @@
                         {{ render_field_list(form.photo, class="choose-file") }}
 
                         {% if photo|length > 0: %}
-                         <a href="{{ url_for('delete_photo', recipe_id=recipe.id)}}">
+                         <a id="deleteLink" href="#">
                              Delete photo
                          </a>
+
                         {% endif %}
                     </div>
                     </dl>
@@ -63,5 +64,28 @@
 
     </form>
 </div>
+
+<form name="deleteForm" action="{{ url_for('delete_photo', recipe_id=recipe.id)}}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+</form>
+
+<script type="text/javascript">
+
+// Wait for the page to load first
+window.onload = function() {
+
+    //Get a reference to the link on the page
+    var a = document.getElementById("deleteLink");
+    var deleteForm = document.getElementById("deleteForm");
+    //Set code to run when the link is clicked
+    a.onclick = function() {
+        document.deleteForm.submit();
+        a.hide();
+        // We don't want the link to actually
+        // redirect the browser to another page
+        return false;
+    }
+}
+</script>
 
 {% endblock %}
