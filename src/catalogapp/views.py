@@ -82,6 +82,7 @@ def oauth_authorized(resp):
         flask.flash(u'Request to sign in was denied by the user.', 'error')
         return flask.redirect(next_url)
 
+    # Verify signed JSON Web Token and retrieve deserialized JSON in the JWT
     try:
         jwt = verify_id_token(resp['id_token'], GOOGLE_CLIENT_ID)
     except Oauth2clientError as err:
@@ -101,7 +102,6 @@ def oauth_authorized(resp):
     # Check is user is already signed in.
     stored_token = flask.session.get('access_token')
     stored_gplus_id = flask.session.get('gplus_id')
-
     if stored_token is not None and jwt.get('sub') == stored_gplus_id:
         fmsg = make_flash_params(
             u'Current user is already connected.', 'error')
@@ -156,7 +156,7 @@ def logout():
         db.session.add(user)
         db.session.commit()
 
-        reset_user_session_vars(flask.session)
+        reset_user_session_vars(flask.session)  # Clear session variable
         logout_user()  # To manage logged in users with Flask-Login
 
         fmsg = make_flash_params(u'Successfully disconnected.')
@@ -175,6 +175,10 @@ def logout():
 @app.route('/index')
 @app.route('/')
 def index():
+    '''
+    Renders the home page with a list of all recipes.
+    :return: The rendered page.
+    '''
     recipes = Item.query.all()  # order_by(Category.name.asc()).
     subtitle = 'All Recipes'
     return flask.render_template('index.html', recipes=recipes, subtitle=subtitle,
@@ -183,6 +187,11 @@ def index():
 
 @app.route('/cuisine/<cuisine_id>')
 def cuisine(cuisine_id):
+    '''
+    Renders the home page with a list all recipes filtered by cuisine cuisine_id.
+    :param cuisine_id: ID of the cuisine to filter by.
+    :return: The rendered page.
+    '''
     recipes = Item.query.filter_by(category_id=cuisine_id).all()
     cuisine = Cuisine.query.get(cuisine_id)
     return flask.render_template('index.html', recipes=recipes,
@@ -191,6 +200,10 @@ def cuisine(cuisine_id):
 
 @app.route('/cuisines')
 def cuisines():
+    '''
+    Renders the home page with a list all cuisines.
+    :return: The rendered page.
+    '''
     cuisines = Cuisine.query.all()
     subtitle = 'All Cuisines'
     return flask.render_template('index.html', cuisines=cuisines,
@@ -199,6 +212,11 @@ def cuisines():
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
+    '''
+    Renders a recipe detail page for the recipe matching recipe_id.
+    :param recipe_id: ID of the recipe to display.
+    :return: The rendered page.
+    '''
     recipe = Item.query.get_or_404(recipe_id)
     photo = models.load_image_base64(recipe.photo)
     return flask.render_template('recipe_detail.html', recipe=recipe, photo=photo,
@@ -208,6 +226,10 @@ def recipe_detail(recipe_id):
 @app.route('/recipe/new', methods=["GET", "POST"])
 @login_required
 def new_recipe():
+    '''
+    Renders a recipe creation page with forms.
+    :return: The rendered page.
+    '''
     form = NewRecipeForm()
     form.cuisine.choices = [(c.id, c.name)
                              for c in Cuisine.query.order_by('name')]
