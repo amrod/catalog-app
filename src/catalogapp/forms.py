@@ -58,7 +58,7 @@ class EditRecipeForm(Form):
     description = TextAreaField(
         u'Instructions', validators=[validators.Length(min=3, max=2000)])
 
-    category = SelectField(u'Category', coerce=int)
+    cuisine = SelectField(u'Category', coerce=int)
 
     photo = FileField(u'Photo', validators=[
         FileAllowed(['jpg', 'png'], u'Images of type .jpg or .png only!')

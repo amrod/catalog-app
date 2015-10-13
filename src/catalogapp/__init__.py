@@ -12,5 +12,5 @@ from flask_wtf.csrf import CsrfProtect
 import catalogapp.views
 
 app.config.from_object('config')
-# app.config.from_pyfile('config.py')
+app.config.from_pyfile('config.py')
 CsrfProtect(app)

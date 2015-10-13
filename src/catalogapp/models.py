@@ -43,7 +43,7 @@ class Cuisine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
 
-    items = db.relationship('Item', backref='category', lazy='dynamic')
+    items = db.relationship('Item', backref='cuisine', lazy='dynamic')
 
     def __init__(self, name):
         self.name = name
@@ -70,17 +70,17 @@ class Item(db.Model):
 
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id'), nullable=False)
-    category_id = db.Column(
-        db.Integer, db.ForeignKey('category.id'), nullable=False)
+    cuisine_id = db.Column(
+        db.Integer, db.ForeignKey('cuisine.id'), nullable=False)
 
-    def __init__(self, name, description, user_id, category_id,
+    def __init__(self, name, description, user_id, cuisine_id,
                  created_at=None, photo=None):
         self.name = name
         self.description = description
         self.created_at = created_at or datetime.now().replace(microsecond=0)
         self.updated_at = self.created_at
         self.user_id = user_id
-        self.category_id = category_id
+        self.cuisine_id = cuisine_id
         self.photo = photo or ''
 
     @property
@@ -93,7 +93,7 @@ class Item(db.Model):
                 'description': self.description,
                 'date_added': self.created_at,
                 'user_id': self.user_id,
-                'cuisine_id': self.category_id,
+                'cuisine_id': self.cuisine_id,
                 'photo_url': url_for('recipe_photo',
                                      recipe_id=self.id, _external=True)}
 
@@ -112,7 +112,7 @@ def load_user_from_id(id):
 
 def get_user(email):
     '''
-    Retrieves a user categoryith the given email from the database
+    Retrieves a user with the given email from the database
     :param email: user's email address.
     :return: models.User object or None if user was not found.
     '''

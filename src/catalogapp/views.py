@@ -179,7 +179,7 @@ def index():
     Renders the home page with a list of all recipes.
     :return: The rendered page.
     '''
-    recipes = Item.query.all()  # order_by(Category.name.asc()).
+    recipes = Item.query.all()  # order_by(Cuisine.name.asc()).
     subtitle = 'All Recipes'
     return flask.render_template('index.html', recipes=recipes, subtitle=subtitle,
                            stats=get_stats())
@@ -192,7 +192,7 @@ def cuisine(cuisine_id):
     :param cuisine_id: ID of the cuisine to filter by.
     :return: The rendered page.
     '''
-    recipes = Item.query.filter_by(category_id=cuisine_id).all()
+    recipes = Item.query.filter_by(cuisine_id=cuisine_id).all()
     cuisine = Cuisine.query.get(cuisine_id)
     return flask.render_template('index.html', recipes=recipes,
                            subtitle=cuisine.name, stats=get_stats())
@@ -246,7 +246,7 @@ def new_recipe():
 
         new_recipe = models.Item(name=form.name.data,
                                  description=form.description.data,
-                                 category_id=form.cuisine.data,
+                                 cuisine_id=form.cuisine.data,
                                  user_id=current_user.id,
                                  photo=filepath)
 
@@ -267,14 +267,14 @@ def new_cuisine():
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
-        new_category = models.Cuisine(name=form.name.data)
+        new_cuisine = models.Cuisine(name=form.name.data)
 
-        db.session.add(new_category)
+        db.session.add(new_cuisine)
         db.session.commit()
-        flask.flash("New category created successfully!")
+        flask.flash("New cuisine created successfully!")
         return flask.redirect(flask.url_for('index'))
 
-    return flask.render_template('form_new_category.html', form=form,
+    return flask.render_template('form_new_cuisine.html', form=form,
                            stats=get_stats())
 
 
@@ -284,7 +284,7 @@ def edit_recipe(recipe_id):
     recipe = Item.query.get_or_404(recipe_id)
 
     form = EditRecipeForm(obj=recipe)
-    form.category.choices = [(c.id, c.name)
+    form.cuisine.choices = [(c.id, c.name)
                              for c in Cuisine.query.order_by('name')]
 
     if recipe.user_id != current_user.id:
@@ -302,7 +302,7 @@ def edit_recipe(recipe_id):
 
         recipe.name = form.name.data
         recipe.description = form.description.data
-        recipe.category_id = form.category.data
+        recipe.cuisine_id = form.cuisine.data
         recipe.updated_at = datetime.now().replace(microsecond=0)
         if filepath:
             recipe.photo = filepath
@@ -312,7 +312,7 @@ def edit_recipe(recipe_id):
         return flask.redirect(flask.url_for('recipe_detail', recipe_id=recipe_id))
 
     # Set current value if rendering form
-    form.category.data = recipe.category_id
+    form.cuisine.data = recipe.cuisine_id
     photo = models.load_image_base64(recipe.photo)
 
     return flask.render_template('form_edit_recipe.html', form=form, recipe=recipe,
@@ -370,7 +370,7 @@ def recipe_photo(recipe_id):
 
 
 @app.route('/recipe/JSON')
-def get_all_recipecategorys_json():
+def get_all_recipes_json():
     recipes = Item.query.all()
     return flask.jsonify(Recipes=[r.serialize for r in recipes])
 
@@ -382,10 +382,10 @@ def get_recipe_json(recipe_id):
 
 
 @app.route('/cuisine/<cuisine_id>/JSON')
-def get_category_recipes_json(cuisine_id):
-    category = Cuisine.query.get_or_404(cuisine_id)
-    recipes = Item.query.filter_by(category_id=cuisine_id).all()
-    return flask.jsonify(Recipes={category.name: [r.serialize for r in recipes]})
+def get_cuisine_recipes_json(cuisine_id):
+    cuisine = Cuisine.query.get_or_404(cuisine_id)
+    recipes = Item.query.filter_by(cuisine_id=cuisine_id).all()
+    return flask.jsonify(Recipes={cuisine.name: [r.serialize for r in recipes]})
 
 
 @app.route('/cuisine/JSON')
