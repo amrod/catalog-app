@@ -37,13 +37,13 @@ To access the recipe data in JSON format, use the following URLs:
 	* Returns all recipies in the catalog. 
 	
 *  **/recipe/\<recipe_id>/JSON**
-	* Returns the recipe with ID <recipe_id>.
+	* Returns the recipe with ID \<recipe_id>.
 
 *  **/cuisine/JSON**
 	* Returns all the cuisine types known to the catalog.
 
 *  **/cuisine/\<cuisine_id>/JSON**
-	* Returns all the recipes of corresponding to the cuisine with ID <cuisine_id>.
+	* Returns all the recipes of corresponding to the cuisine with ID \<cuisine_id>.
 
 #### RSS Feed	
 
