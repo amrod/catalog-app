@@ -14,7 +14,7 @@
         <tr>
             <td>{{loop.index}}</td>
             <td><a href="{{url_for('recipe_detail', recipe_id=r.id)}}"> {{r.name}} </a></td>
-            <td> {{r.category.name}}</td>
+            <td> {{r.cuisine.name}}</td>
             <td> {{r.user.name|truncate(16)}}</td>
             <td>
                 <a class="btn btn-default" href="{{url_for('edit_recipe', recipe_id=r.id)}}">Edit </a>

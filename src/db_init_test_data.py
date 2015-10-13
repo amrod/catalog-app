@@ -1,6 +1,6 @@
 import catalogapp
 from datetime import datetime
-from catalogapp.models import User, Category, Item
+from catalogapp.models import User, Cuisine, Item
 
 if __name__ == '__main__':
 
@@ -14,11 +14,14 @@ if __name__ == '__main__':
                   {'name': 'Dominican'},
                   {'name': 'Mexican'}]
 
-    items = [{'user_id': 2,'category_id': 1, 'name': "General Tso's"    , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 6)},
-             {'user_id': 2,'category_id': 1, 'name': 'Chop Suey'        , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 9, 1)},
-             {'user_id': 3,'category_id': 2, 'name': 'Raisin Bran Bread', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 5)},
-             {'user_id': 4,'category_id': 3, 'name': 'Tostones'         , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 2)},
-             {'user_id': 4,'category_id': 4, 'name': 'Salmon Burgers'   , 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 3, 1)},]
+    items = [{'user_id': 2, 'category_id': 1, 'name': "General Tso's", 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 6)},
+             {'user_id': 2, 'category_id': 1, 'name': 'Chop Suey', 'description':
+                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 9, 1)},
+             {'user_id': 3, 'category_id': 2, 'name': 'Raisin Bran Bread', 'description':
+                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 5)},
+             {'user_id': 4, 'category_id': 3, 'name': 'Tostones', 'description':
+                 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 1, 2)},
+             {'user_id': 4, 'category_id': 4, 'name': 'Salmon Burgers', 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.\n' * 5, 'created_at': datetime(2015, 3, 1)}, ]
 
     db = catalogapp.db
     db.create_all()
@@ -31,7 +34,7 @@ if __name__ == '__main__':
 
     for kwargs in categories:
         print kwargs
-        m = Category(**kwargs)
+        m = Cuisine(**kwargs)
         db.session.add(m)
         db.session.commit()
 
@@ -40,5 +43,3 @@ if __name__ == '__main__':
         t = Item(**kwargs)
         db.session.add(t)
         db.session.commit()
-
-

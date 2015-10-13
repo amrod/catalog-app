@@ -13,6 +13,9 @@ from . import db, app
 
 
 class User(UserMixin, db.Model):
+    '''
+    Describes a User of the application.
+    '''
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(250), nullable=True)
@@ -32,7 +35,11 @@ class User(UserMixin, db.Model):
                 'email': self.email,
                 'picture_url': self.picture_url}
 
-class Category(db.Model):
+
+class Cuisine(db.Model):
+    '''
+    Describes a style of cuisine to which recipes belong.
+    '''
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
 
@@ -43,10 +50,17 @@ class Category(db.Model):
 
     @property
     def serialize(self):
+        '''
+        Returns the object's attributes in an easy to serialize format.
+        '''
         return {'id': self.id,
                 'name': self.name}
 
+
 class Item(db.Model):
+    '''
+    Describes a recipe item.
+    '''
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.String(2000), nullable=False)
@@ -71,23 +85,34 @@ class Item(db.Model):
 
     @property
     def serialize(self):
+        '''
+        Returns the object's attributes in an easy to serialize format.
+        '''
         return {'id': self.id,
                 'name': self.name,
                 'description': self.description,
                 'date_added': self.created_at,
                 'user_id': self.user_id,
                 'cuisine_id': self.category_id,
-                'photo_url': url_for('recipe_photo', recipe_id=self.id, _external=True)}
+                'photo_url': url_for('recipe_photo',
+                                     recipe_id=self.id, _external=True)}
 
 # Helper functions
 
 @lm.user_loader
 def load_user_from_id(id):
+    '''
+    Handler for LoginManager's user_loader. Retrieves the User object
+    corresponding to id.
+    :param id: ID of use to retrieve.
+    :return: User object corresponding to id.
+    '''
     return User.query.get(int(id))
+
 
 def get_user(email):
     '''
-    Retrieves a user wcategoryith the given email from the database
+    Retrieves a user categoryith the given email from the database
     :param email: user's email address.
     :return: models.User object or None if user was not found.
     '''
@@ -97,6 +122,7 @@ def get_user(email):
     except Exception as err:
         app.logger.error(err)
         return None
+
 
 def create_user(session):
     '''
@@ -112,9 +138,11 @@ def create_user(session):
         db.session.add(user)
         db.session.commit()
         return user
+
     except Exception as err:
         app.logger.error(err)
         return None
+
 
 def load_user(session):
     '''
@@ -144,6 +172,7 @@ def load_user(session):
 
     return user
 
+
 def try_open_file(target_dir, basename=None):
     '''
     Attempts to create a file in the filesystem avoiding race condition.
@@ -157,7 +186,7 @@ def try_open_file(target_dir, basename=None):
     if not basename:
         basename = ''
 
-    basename = scramble_name(str(random.randint(0, sys.maxint)) + basename)
+    basename = scramble_name(str(random.randint(0, sys.maxsize)) + basename)
     dest = os.path.join(target_dir, basename)
 
     try:
@@ -194,6 +223,7 @@ def load_image_base64(p):
         return img_str
     except (EnvironmentError, TypeError) as e:
         return u''
+
 
 def delete_file(p):
     '''
