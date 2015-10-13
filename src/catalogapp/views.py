@@ -261,24 +261,6 @@ def new_recipe():
         'form_new_recipe.html', form=form, stats=get_stats())
 
 
-@app.route('/cuisine/new', methods=["GET", "POST"])
-@login_required
-def new_cuisine():
-    form = CuisineForm()
-
-    # Form-WTF implements CSRF using the Flask SECRET_KEY
-    if form.validate_on_submit():
-        new_cuisine = models.Cuisine(name=form.name.data)
-
-        db.session.add(new_cuisine)
-        db.session.commit()
-        flask.flash("New cuisine created successfully!")
-        return flask.redirect(flask.url_for('index'))
-
-    return flask.render_template('form_new_cuisine.html', form=form,
-                           stats=get_stats())
-
-
 @app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_recipe(recipe_id):
@@ -328,6 +310,48 @@ def edit_recipe(recipe_id):
 
     return flask.render_template('form_edit_recipe.html', form=form, recipe=recipe,
                            photo=photo, stats=get_stats())
+
+
+@app.route('/cuisine/new', methods=["GET", "POST"])
+@login_required
+def new_cuisine():
+    """
+    Renders the cuisine creation form.
+    :return: The rendered page.
+    """
+    form = CuisineForm()
+
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
+    if form.validate_on_submit():
+        new_cuisine = models.Cuisine(name=form.name.data)
+
+        db.session.add(new_cuisine)
+        db.session.commit()
+        flask.flash("New cuisine created successfully!")
+        return flask.redirect(flask.url_for('index'))
+
+    return flask.render_template(
+        'form_new_cuisine.html', form=form, stats=get_stats())
+
+
+@app.route('/cuisine/<cuisine_id>/edit', methods=["GET", "POST"])
+@login_required
+def edit_cuisine(cuisine_id):
+
+    cuis = Cuisine.query.get_or_404(cuisine_id)
+
+    form = CuisineForm(obj=cuis)
+
+    # Form-WTF implements CSRF using the Flask SECRET_KEY
+    if form.validate_on_submit():
+        cuis.name = form.name.data
+        db.session.commit()
+
+        flask.flash("Cuisine updated successfully!")
+        return flask.redirect(flask.url_for('cuisine', cuisine_id=cuis.id))
+
+    return flask.render_template(
+        'form_edit_cuisine.html', form=form, cuisine=cuis, stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])

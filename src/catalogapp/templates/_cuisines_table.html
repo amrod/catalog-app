@@ -4,6 +4,7 @@
         <tr>
             <th>#</th>
             <th>Cuisine Type</th>
+            <th>Action</th>
         </tr>
         </thead>
         <tbody>
@@ -11,6 +12,9 @@
         <tr>
             <td>{{loop.index}}</td>
             <td><a href="{{ url_for('cuisine', cuisine_id=c.id) }}"> {{c.name}} </a></td>
+            <td>
+                <a class="btn btn-default" href="{{url_for('edit_cuisine', cuisine_id=c.id)}}">Edit </a>
+            </td>
         </tr>
         {% endfor %}
         </tbody>
