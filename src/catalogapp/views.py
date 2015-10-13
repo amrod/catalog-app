@@ -404,18 +404,32 @@ def recipe_photo(recipe_id):
 
 @app.route('/recipe/JSON')
 def get_all_recipes_json():
+    """
+    JSON endpoint providing data for all recipes.
+    :return: JSON document with details about all recipes.
+    """
     recipes = Item.query.all()
     return flask.jsonify(Recipes=[r.serialize for r in recipes])
 
 
 @app.route('/recipe/<recipe_id>/JSON')
 def get_recipe_json(recipe_id):
+    """
+    JSON endpoint providing data for one recipe with ID recipe_id.
+    :param recipe_id: ID of recipe to retrieve.
+    :return: JSON document with details about the recipe.
+    """
     recipe = Item.query.get_or_404(recipe_id)
     return flask.jsonify(Recipe=recipe.serialize)
 
 
 @app.route('/cuisine/<cuisine_id>/JSON')
 def get_cuisine_recipes_json(cuisine_id):
+    """
+    JSON endpoint providing data for one cuisine type.
+    :param cuisine_id: ID of the cuisine type to retrieve.
+    :return: JSON document with details about the cuisine.
+    """
     cuisine = Cuisine.query.get_or_404(cuisine_id)
     recipes = Item.query.filter_by(cuisine_id=cuisine_id).all()
     return flask.jsonify(Recipes={cuisine.name: [r.serialize for r in recipes]})
@@ -423,12 +437,20 @@ def get_cuisine_recipes_json(cuisine_id):
 
 @app.route('/cuisine/JSON')
 def get_categories_json():
+    """
+    JSON endpoint providing data for all cuisine types.
+    :return: JSON document with details about all cuisines.
+    """
     categories = Cuisine.query.all()
     return flask.jsonify(Categories=[c.serialize for c in categories])
 
 
 @app.route('/recipe/recent.atom')
 def recent_feed():
+    """
+    Atom endpoint providing a feed of the 15 most recently created recipes.
+    :return: Atom feed with 15 most recently created recipes.
+    """
 
     recipes = Item.query.order_by(Item.created_at.desc()).limit(15).all()
 
@@ -451,7 +473,11 @@ def recent_feed():
 # Helper functions
 
 def reset_user_session_vars(session):
-    """Resets the user's session variables"""
+    """
+    Resets the user's session variables
+    :param session: session variable as a dictionary
+    :return: None
+    """
     session.pop('name', None)
     session.pop('picture', None)
     session.pop('email', None)
@@ -460,6 +486,12 @@ def reset_user_session_vars(session):
 
 
 def save_photo(form):
+    """
+    Store the file in the form.photo field of the form (is there is one)
+     in disk.
+    :param form: Form instance with file upload information
+    :return: The final path to the file created.
+    """
     orig_name = secure_filename(current_user.email + form.photo.data.filename)
     filepath = None
 
@@ -474,6 +506,12 @@ def save_photo(form):
 
 
 def make_flash_params(message, category='message'):
+    """
+    Wrap the message and category parameters ina dictionary.
+    :param message: A string
+    :param category: A string
+    :return: A dictionary
+    """
     return {'message': message, 'category': category}
 
 
