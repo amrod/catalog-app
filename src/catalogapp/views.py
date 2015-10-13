@@ -333,12 +333,20 @@ def edit_recipe(recipe_id):
 @app.route('/recipe/<recipe_id>/delete', methods=["GET", "POST"])
 @login_required
 def delete_recipe(recipe_id):
+    """
+    Renders the recipe deletion form.
+    :param recipe_id: ID of the recipe to be deleted.
+    :return: The rendered pge.
+    """
+
     recipe = Item.query.get_or_404(recipe_id)
     form = DeleteRecipeForm()
 
     if recipe.user_id != current_user.id:
-        flask.flash('You do not have permission to delete this recipe.', 'error')
-        return flask.redirect(flask.url_for('recipe_detail', recipe_id=recipe_id))
+        flask.flash(
+            'You do not have permission to delete this recipe.', 'error')
+        return flask.redirect(
+            flask.url_for('recipe_detail', recipe_id=recipe_id))
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
@@ -349,18 +357,25 @@ def delete_recipe(recipe_id):
         flask.flash('Recipe {} was deleted.'.format(recipe.name))
         return flask.redirect(flask.url_for('index'))
 
-    return flask.render_template('form_delete_recipe.html', form=form, recipe=recipe,
-                           stats=get_stats())
+    return flask.render_template(
+        'form_delete_recipe.html', form=form, recipe=recipe, stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>/photo/delete', methods=["GET", "POST"])
 @login_required
 def delete_photo(recipe_id):
+    """
+    Deletes the photo from a recipe. User must have proper rights in order
+    to complete the operation.
+    :param recipe_id:
+    :return:
+    """
     recipe = Item.query.get_or_404(recipe_id)
 
     if recipe.user_id != current_user.id:
         flask.flash(
             'You do not have permission to delete this recipe photo.', 'error')
+
         return flask.redirect(flask.url_for('recipe_detail', recipe_id=recipe_id))
 
     models.delete_file(recipe.photo)
@@ -372,7 +387,14 @@ def delete_photo(recipe_id):
 
 @app.route('/recipe/<recipe_id>/photo')
 def recipe_photo(recipe_id):
-    recipe = Item.query.get(recipe_id)
+    """
+    Renders the photo linked to the recipe with ID recipe_id in an
+    HTML document.
+    :param recipe_id: ID of the recipe to display the photo from.
+    :return: The rendered page, or 404 error if the recipe doesn't exist or it
+     doesn't have a photo.
+    """
+    recipe = Item.query.get_or_404(recipe_id)
     if not recipe.photo:
         flask.abort(404)
 
