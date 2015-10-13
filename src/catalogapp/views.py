@@ -282,6 +282,12 @@ def new_cuisine():
 @app.route('/recipe/<recipe_id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_recipe(recipe_id):
+    """
+    Renders the recipe editing form.
+    :param recipe_id: ID of the recipe to edit.
+    :return: The rendered page.
+    """
+
     recipe = Item.query.get_or_404(recipe_id)
 
     form = EditRecipeForm(obj=recipe)
@@ -295,13 +301,16 @@ def edit_recipe(recipe_id):
     if form.validate_on_submit():
 
         try:
+            # Save photo in disk if one was uploaded.
             filepath = save_photo(form)
-            models.delete_file(recipe.photo)  # Delete current photo
+            # Delete current photo
+            models.delete_file(recipe.photo)
 
         except OSError as e:
             flask.flash("Something went wrong. Please contact support.")
             return flask.redirect(flask.url_for('edit_recipe'))
 
+        # Update recipe info with data from the form
         recipe.name = form.name.data
         recipe.description = form.description.data
         recipe.cuisine_id = form.cuisine.data
