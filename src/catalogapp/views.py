@@ -346,7 +346,11 @@ def new_cuisine():
 @app.route('/cuisine/<cuisine_id>/edit', methods=["GET", "POST"])
 @login_required
 def edit_cuisine(cuisine_id):
-
+    """
+    Renders the cuisine editing form.
+    :param cuisine_id: ID of the cuisine to edit.
+    :return: The rendered page.
+    """
     cuis = Cuisine.query.get_or_404(cuisine_id)
 
     form = CuisineForm(obj=cuis)
@@ -401,8 +405,12 @@ def delete_photo(recipe_id):
     Deletes the photo from a recipe. User must have proper rights in order
     to complete the operation.
     :param recipe_id:
-    :return:
+    :return: Redirects back to cuisine editing page or 404 if method not POST
     """
+
+    if flask.request.method != 'POST':
+        flask.abort(404)
+
     recipe = Item.query.get_or_404(recipe_id)
 
     if recipe.user_id != current_user.id:
