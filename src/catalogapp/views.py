@@ -56,6 +56,10 @@ google = oauth.remote_app('google',
 
 @app.route('/login')
 def login():
+    """
+    Initiates the OAuth2 authorization process with Google.
+    :return: Response returned by google.authorize
+    """
     res = google.authorize(
         callback=flask.url_for('oauth_authorized', _external=True))
     return res
@@ -63,6 +67,11 @@ def login():
 
 @google.tokengetter
 def get_google_token(token=None):
+    """
+    Retrieves the token from the session data.
+    :param token: Used by tokengetter wrapper.
+    :return: Access token as stored in session variable.
+    """
     return flask.session.get('access_token')
 
 
