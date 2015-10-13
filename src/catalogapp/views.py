@@ -136,9 +136,9 @@ def oauth_authorized(resp):
 @app.route('/logout')
 @login_required
 def logout():
-    '''
+    """
     Removes the users's data from the session and logs the user out.
-    '''
+    """
 
     access_token = flask.session.get('access_token')
     result = None
@@ -175,64 +175,65 @@ def logout():
 @app.route('/index')
 @app.route('/')
 def index():
-    '''
+    """
     Renders the home page with a list of all recipes.
     :return: The rendered page.
-    '''
+    """
     recipes = Item.query.all()  # order_by(Cuisine.name.asc()).
     subtitle = 'All Recipes'
-    return flask.render_template('index.html', recipes=recipes, subtitle=subtitle,
-                           stats=get_stats())
+    return flask.render_template(
+        'index.html', recipes=recipes, subtitle=subtitle, stats=get_stats())
 
 
 @app.route('/cuisine/<cuisine_id>')
 def cuisine(cuisine_id):
-    '''
+    """
     Renders the home page with a list all recipes filtered by cuisine cuisine_id.
     :param cuisine_id: ID of the cuisine to filter by.
     :return: The rendered page.
-    '''
+    """
     recipes = Item.query.filter_by(cuisine_id=cuisine_id).all()
     cuisine = Cuisine.query.get(cuisine_id)
-    return flask.render_template('index.html', recipes=recipes,
-                           subtitle=cuisine.name, stats=get_stats())
+    return flask.render_template(
+        'index.html', recipes=recipes, subtitle=cuisine.name, stats=get_stats())
 
 
 @app.route('/cuisines')
 def cuisines():
-    '''
+    """
     Renders the home page with a list all cuisines.
     :return: The rendered page.
-    '''
+    """
     cuisines = Cuisine.query.all()
     subtitle = 'All Cuisines'
-    return flask.render_template('index.html', cuisines=cuisines,
-                           subtitle=subtitle, stats=get_stats())
+    return flask.render_template(
+        'index.html', cuisines=cuisines, subtitle=subtitle, stats=get_stats())
 
 
 @app.route('/recipe/<recipe_id>')
 def recipe_detail(recipe_id):
-    '''
+    """
     Renders a recipe detail page for the recipe matching recipe_id.
     :param recipe_id: ID of the recipe to display.
     :return: The rendered page.
-    '''
+    """
     recipe = Item.query.get_or_404(recipe_id)
     photo = models.load_image_base64(recipe.photo)
-    return flask.render_template('recipe_detail.html', recipe=recipe, photo=photo,
-                           stats=get_stats())
+    return flask.render_template(
+        'recipe_detail.html', recipe=recipe, photo=photo, stats=get_stats())
 
 
 @app.route('/recipe/new', methods=["GET", "POST"])
 @login_required
 def new_recipe():
-    '''
+    """
     Renders a recipe creation page with forms.
     :return: The rendered page.
-    '''
+    """
+
     form = NewRecipeForm()
-    form.cuisine.choices = [(c.id, c.name)
-                             for c in Cuisine.query.order_by('name')]
+    form.cuisine.choices = [
+        (c.id, c.name) for c in Cuisine.query.order_by('name')]
 
     # Form-WTF implements CSRF using the Flask SECRET_KEY
     if form.validate_on_submit():
@@ -256,8 +257,8 @@ def new_recipe():
 
         return flask.redirect(flask.url_for('recipe_detail', recipe_id=new_recipe.id))
 
-    return flask.render_template('form_new_recipe.html', form=form,
-                           stats=get_stats())
+    return flask.render_template(
+        'form_new_recipe.html', form=form, stats=get_stats())
 
 
 @app.route('/cuisine/new', methods=["GET", "POST"])
@@ -295,6 +296,7 @@ def edit_recipe(recipe_id):
 
         try:
             filepath = save_photo(form)
+            models.delete_file(recipe.photo)  # Delete current photo
 
         except OSError as e:
             flask.flash("Something went wrong. Please contact support.")
@@ -418,7 +420,7 @@ def recent_feed():
 # Helper functions
 
 def reset_user_session_vars(session):
-    '''Resets the user's session variables'''
+    """Resets the user's session variables"""
     session.pop('name', None)
     session.pop('picture', None)
     session.pop('email', None)
@@ -445,7 +447,7 @@ def make_flash_params(message, category='message'):
 
 
 def get_stats():
-    '''Get counts of database items.'''
+    """Get counts of database items."""
     stats = {
         'recipes': Item.query.count(),
         'cuisines': Cuisine.query.count()
