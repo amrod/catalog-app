@@ -9,9 +9,9 @@ from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 
 class CuisineForm(Form):
-    '''
+    """
     Form for creating and editing cuisines.
-    '''
+    """
     name = StringField(
         u'Category Name',
         validators=[
@@ -22,9 +22,9 @@ class CuisineForm(Form):
 
 
 class NewRecipeForm(Form):
-    '''
+    """
     Form for creating a new recipe.
-    '''
+    """
     name = StringField(
         u'Title',
         validators=[
@@ -44,9 +44,9 @@ class NewRecipeForm(Form):
 
 
 class EditRecipeForm(Form):
-    '''
+    """
     Form for editing an existing recipe.
-    '''
+    """
     name = StringField(
         u'Title',
         validators=[
@@ -66,9 +66,9 @@ class EditRecipeForm(Form):
 
 
 class DeleteRecipeForm(Form):
-    '''
+    """
     Form for deleting a recipe.
-    '''
+    """
     confirm_delete = BooleanField(
         u'I confirm I wish to delete this recipe.', [
             validators.Required("Check the box if you wish to delete this recipe.")])

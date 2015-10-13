@@ -13,9 +13,9 @@ from . import db, app
 
 
 class User(UserMixin, db.Model):
-    '''
+    """
     Describes a User of the application.
-    '''
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     email = db.Column(db.String(250), nullable=True)
@@ -37,9 +37,9 @@ class User(UserMixin, db.Model):
 
 
 class Cuisine(db.Model):
-    '''
+    """
     Describes a style of cuisine to which recipes belong.
-    '''
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
 
@@ -50,17 +50,17 @@ class Cuisine(db.Model):
 
     @property
     def serialize(self):
-        '''
+        """
         Returns the object's attributes in an easy to serialize format.
-        '''
+        """
         return {'id': self.id,
                 'name': self.name}
 
 
 class Item(db.Model):
-    '''
+    """
     Describes a recipe item.
-    '''
+    """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64), nullable=False)
     description = db.Column(db.String(2000), nullable=False)
@@ -85,9 +85,9 @@ class Item(db.Model):
 
     @property
     def serialize(self):
-        '''
+        """
         Returns the object's attributes in an easy to serialize format.
-        '''
+        """
         return {'id': self.id,
                 'name': self.name,
                 'description': self.description,
@@ -101,21 +101,21 @@ class Item(db.Model):
 
 @lm.user_loader
 def load_user_from_id(id):
-    '''
+    """
     Handler for LoginManager's user_loader. Retrieves the User object
     corresponding to id.
     :param id: ID of use to retrieve.
     :return: User object corresponding to id.
-    '''
+    """
     return User.query.get(int(id))
 
 
 def get_user(email):
-    '''
+    """
     Retrieves a user with the given email from the database
     :param email: user's email address.
     :return: models.User object or None if user was not found.
-    '''
+    """
     try:
         user = db.session.query(User).filter_by(email=email).one()
         return user
@@ -125,11 +125,11 @@ def get_user(email):
 
 
 def create_user(session):
-    '''
+    """
     Creates a user based on the information stored in the session dictionary.
     :param session: dictionary of session variables.
     :return: models.User object or None if it could not be created.
-    '''
+    """
     try:
         user = User(name=session.get('name'),
                     email=session.get('email'),
@@ -145,11 +145,11 @@ def create_user(session):
 
 
 def load_user(session):
-    '''
+    """
     Loads a use from the database using information stored in the session dictionary.
     :param session: dictionary of session variables.
     :return: the user object retrieved or created.
-    '''
+    """
     user = get_user(session.get('email'))
 
     if not user:
@@ -174,13 +174,13 @@ def load_user(session):
 
 
 def try_open_file(target_dir, basename=None):
-    '''
+    """
     Attempts to create a file in the filesystem avoiding race condition.
     :param target_dir: the target directory where tho save the file
     :basename: a seed name for the file.
     :return: a tuple containing file descriptor as returned by os.open()
     and the file's relative path.
-    '''
+    """
     flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
 
     if not basename:
@@ -201,21 +201,21 @@ def try_open_file(target_dir, basename=None):
 
 
 def scramble_name(basename):
-    '''
+    """
     Computes SHA-1 of the given filename.
     :param basename: the string to hash.
     :return: the SH-1 hash
-    '''
+    """
     ext = os.path.splitext(basename)[1]
     return hashlib.sha1(basename).hexdigest() + ext
 
 
 def load_image_base64(p):
-    '''
+    """
     Encodes the contents of the image file p and returns the encoded string.
     :param p: path to the file to encode
     :return: encoded value
-    '''
+    """
     try:
         with open(p, "rb") as img:
             img_str = base64.b64encode(img.read()).decode()
@@ -226,11 +226,11 @@ def load_image_base64(p):
 
 
 def delete_file(p):
-    '''
+    """
     Removes file p from the file system.
     :param p: path to the file to be deleted.
     :return: None
-    '''
+    """
     if not p:
         return
     try:
